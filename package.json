@@ -1,0 +1,12 @@
+{
+    "name": "@goengine/webgl",
+    "version": "0.1.0",
+    "description": "Hello GoEngine.webgl",
+    "license": "MIT",
+    "author": "Mr.Rui",
+    "type": "module",
+    "dependencies": {},
+    "devDependencies": {
+        "@webgpu/types": "^0.1.66"
+    }
+}
