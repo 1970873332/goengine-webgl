@@ -83,7 +83,7 @@ export default class OrthographicCamera<E extends Record<any, any>> extends Came
         return this;
     }
 
-    public copy(target: this, silend?: boolean): this {
+    public copy(target: this, update?: boolean): this {
         const { near, far } = target.config,
             { top, right, bottom, left } = target.viewConfig;
         this.setConfig({
@@ -94,7 +94,7 @@ export default class OrthographicCamera<E extends Record<any, any>> extends Came
             bottom,
             left,
         });
-        !silend && this.updateProjectionMatrix();
+        !update && this.updateProjectionMatrix();
         return this;
     }
 

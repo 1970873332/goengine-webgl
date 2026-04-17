@@ -1,4 +1,4 @@
-import DuplicatableComponent from "@core/component/fussy/Duplicatable";
+import DuplicatableComponent, { DuplicatableSaveJSON } from "@core/component/fussy/Duplicatable";
 import ArrayAttribute from "@core/object/attribute/Array";
 import { Vector4 } from "@core/object/math/Index";
 
@@ -49,8 +49,7 @@ export default abstract class BaseGeometry<
 
     public toJSON(): ISaveJSON {
         return {
-            uuid: this.uuid,
-            type: this.constructor.name,
+            ...super.toJSON()
         };
     }
 }
@@ -74,16 +73,7 @@ interface IAttribute {
     position?: ArrayAttribute<Float32Array<ArrayBuffer>>;
 }
 
-interface ISaveJSON {
-    /**
-     * 唯一标识
-     */
-    uuid: string;
-    /**
-     * 类型
-     */
-    type: string;
-}
+interface ISaveJSON extends DuplicatableSaveJSON { }
 
 export {
     IAttribute as BaseGeometryAttribute,

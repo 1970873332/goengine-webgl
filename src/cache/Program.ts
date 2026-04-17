@@ -1,10 +1,10 @@
 import ShaderState from "../states/Shader";
-import WeakMapCache from "./base/WeakMap";
+import MapCache from "./base/Map";
 
 /**
  * 程序缓存
  */
-export default class ProgramCache extends WeakMapCache<GLSL.Shader<ShaderState<any>>, WebGLProgram> {
+export default class ProgramCache extends MapCache<WebGLProgram> {
     /**
      * 分配
      * @param shader
@@ -13,11 +13,11 @@ export default class ProgramCache extends WeakMapCache<GLSL.Shader<ShaderState<a
     public allocate(
         shader: GLSL.Shader<ShaderState<any>>,
     ): WebGLProgram | undefined {
-        if (this.has(shader)) return this.get(shader)!;
+        if (this.has(shader.id)) return this.get(shader.id)!;
         const program: WebGLProgram = this.gl.createProgram(),
-            { vertex, fragment } = shader;
-        this.gl.attachShader(program, vertex);
-        this.gl.attachShader(program, fragment);
+            { vertex: { shader: vertexShader }, fragment: { shader: fragmentShader } } = shader;
+        vertexShader && this.gl.attachShader(program, vertexShader);
+        fragmentShader && this.gl.attachShader(program, fragmentShader);
         this.gl.linkProgram(program);
         // 检查链接状态
         const linkSuccess: boolean = !!this.gl.getProgramParameter(
@@ -29,7 +29,7 @@ export default class ProgramCache extends WeakMapCache<GLSL.Shader<ShaderState<a
             this.gl.deleteProgram(program);
             return void 0;
         }
-        this.set(shader, program);
+        this.set(shader.id, program);
         return program;
     }
 }

@@ -1,4 +1,4 @@
-import DuplicatableComponent from "@core/component/fussy/Duplicatable";
+import DuplicatableComponent, { DuplicatableSaveJSON } from "@core/component/fussy/Duplicatable";
 import { BlendType, SideType } from "@webgl//GLSL";
 
 /**
@@ -67,8 +67,7 @@ export default abstract class BaseMaterial<
 
     public toJSON(): ISaveJSON {
         return {
-            uuid: this.uuid,
-            type: this.constructor.name,
+            ...super.toJSON(),
             color: this.color,
             alpha: this.alpha,
             transparent: this.transparent,
@@ -84,16 +83,7 @@ interface IEvent { }
 
 interface IConfig extends Partial<TOptions> { }
 
-interface ISaveJSON extends TOptions {
-    /**
-     * 唯一标识
-     */
-    uuid: string;
-    /**
-     * 类型
-     */
-    type: string;
-}
+interface ISaveJSON extends DuplicatableSaveJSON, TOptions { }
 
 type TOptions = Pick<
     BaseMaterial<any, any>,

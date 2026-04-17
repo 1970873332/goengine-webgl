@@ -39,22 +39,8 @@ export default class BufferCache extends WeakMapCache<ArrayBuffer, WebGLBuffer> 
                         AttributeKey[key as keyof typeof AttributeKey] ?? key,
                     );
             if (local !== -1) {
-                // 更新缓存位置
-                if (!(key in state.buffer.location)) {
-                    state.expire = true;
-                    state.buffer.location[key] = local;
-                }
                 // 绑定缓冲
                 this.gl.bindBuffer(this.gl.ARRAY_BUFFER, buffer);
-                // 上传数据
-                if (!this.has(source)) {
-                    this.gl.bufferData(
-                        this.gl.ARRAY_BUFFER,
-                        attribute.array,
-                        this.gl.STATIC_DRAW,
-                    );
-                    this.set(source, buffer);
-                }
                 // 指定缓冲读取规则
                 this.gl.vertexAttribPointer(
                     local,
@@ -64,8 +50,23 @@ export default class BufferCache extends WeakMapCache<ArrayBuffer, WebGLBuffer> 
                     0,
                     0,
                 );
-                // 启用属性
-                this.gl.enableVertexAttribArray(local);
+                // 存储数据缓冲
+                if (!this.has(source)) {
+                    // 上传数据
+                    this.gl.bufferData(
+                        this.gl.ARRAY_BUFFER,
+                        attribute.array,
+                        this.gl.STATIC_DRAW,
+                    );
+                    // 启用属性
+                    this.gl.enableVertexAttribArray(local);
+                    this.set(source, buffer);
+                }
+                // 更新缓存位置
+                if (!(key in state.buffer.location)) {
+                    state.expire = true;
+                    state.buffer.location[key] = local;
+                }
             }
         });
         // 绑定索引缓冲

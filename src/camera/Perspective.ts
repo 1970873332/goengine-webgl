@@ -74,7 +74,7 @@ export default class PerspectiveCamera<E extends Record<any, any>> extends Camer
         return this;
     }
 
-    public copy(target: this, silend?: boolean): this {
+    public copy(target: this, update?: boolean): this {
         const { fov, aspect, near, far } = target.config;
         this.setConfig({
             fov,
@@ -82,7 +82,7 @@ export default class PerspectiveCamera<E extends Record<any, any>> extends Camer
             near,
             far,
         });
-        !silend && this.updateProjectionMatrix();
+        !update && this.updateProjectionMatrix();
         return this;
     }
 

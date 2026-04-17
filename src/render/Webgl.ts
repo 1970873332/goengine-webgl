@@ -10,7 +10,7 @@ import Camera from "../camera/Camera";
 import BaseGeometry from "../geometry/Base";
 import BaseMaterial from "../material/Base";
 import ShaderMaterial, { ShaderMaterialUniform } from "../material/Shader";
-import { Mesh } from "../node/Index";
+import { Mesh, Scene } from "../node/Index";
 import ShaderState from "../states/Shader";
 
 /**
@@ -41,14 +41,25 @@ export default class WebglRenderer {
      * 状态缓存
      */
     protected declare stateCache: StateCache;
+    /**
+     * 状态
+     */
+    private state?: State;
+    /**
+     * 临时float32数组
+     */
+    private interimFloat32Array: Float32Array = new Float32Array(Matrix4.identity.length);
 
     constructor(config: IConfig) {
-        this.gl = config.gl;
-        this.bufferCache = new BufferCache(this.gl);
-        this.shaderCache = new ShaderCache(this.gl);
-        this.textureCache = new TextureCache(this.gl);
-        this.programCache = new ProgramCache(this.gl);
-        this.stateCache = new StateCache(this.gl);
+        const {
+            gl
+        } = config;
+        this.gl = gl;
+        this.bufferCache = new BufferCache(gl);
+        this.shaderCache = new ShaderCache(gl);
+        this.textureCache = new TextureCache(gl);
+        this.programCache = new ProgramCache(gl);
+        this.stateCache = new StateCache(gl);
     }
 
     /**
@@ -67,10 +78,11 @@ export default class WebglRenderer {
         const u_matrix: WebGLUniformLocation | null =
             state.uniform.location[key] ??
             this.gl.getUniformLocation(program, key);
+        this.interimFloat32Array.set(matrix.m);
         this.gl.uniformMatrix4fv(
             u_matrix,
             false,
-            new Float32Array(matrix.toArray()),
+            this.interimFloat32Array
         );
     }
     /**
@@ -163,11 +175,6 @@ export default class WebglRenderer {
                 this.gl.getUniformLocation(program, name),
                 { value, type } = attribute;
             if (!location || !value) return;
-            // 更新uniform变量位置
-            if (!(name in state.uniform.location)) {
-                state.expire = true;
-                state.uniform.location[name] = location;
-            }
             // 设置uniform变量值
             switch (type) {
                 case UniformType.Texture:
@@ -176,11 +183,11 @@ export default class WebglRenderer {
                         this.stateCache.nextUnit,
                     );
                     let unit: number = state.texture.list.indexOf(texture);
-                    if (this.stateCache.currentUnit !== unit) {
+                    if (this.stateCache.unit !== unit) {
                         if (unit === -1) {
                             state.expire = true;
                             state.texture.list[
-                                (unit = this.stateCache.stepUnit())
+                                (unit = this.stateCache.stepUnit() - 1)
                             ] = texture;
                         } else {
                             this.gl.activeTexture(this.gl.TEXTURE0 + unit);
@@ -189,6 +196,11 @@ export default class WebglRenderer {
                     }
                     this.gl.uniform1i(location, unit);
                     break;
+            }
+            // 更新uniform变量位置
+            if (!(name in state.uniform.location)) {
+                state.expire = true;
+                state.uniform.location[name] = location;
             }
         });
     }
@@ -201,8 +213,8 @@ export default class WebglRenderer {
      */
     public renderNode(node: Mesh<any, any, any, any>, camera: Camera<any, any>): void {
         const {
-            material: { value: material },
-            geometry: { value: geometry },
+            material,
+            geometry,
         } = node as Mesh<BaseGeometry<any, any>, BaseMaterial<any, any>, any, any>;
         if (!material || !geometry) return;
         const // 分配着色器
@@ -214,15 +226,12 @@ export default class WebglRenderer {
         if (!program) return console.warn("程序未准备就绪", node);
         // 分配状态
         const state: State = this.stateCache.allocate(program);
-
-        // 使用程序
-        this.stateCache.useProgram(program);
-
-        // 绑定缓冲
-        this.bufferCache.bind(geometry, program, state);
-
         // 应用渲染模式
-        this.applyRenderMode(state, material);
+        if (this.state !== state) {
+            this.state = state;
+            this.gl.useProgram(program);
+            this.applyRenderMode(state, material);
+        }
 
         // 应用MVP矩阵
         this.applyMVPMatrix(
@@ -244,15 +253,12 @@ export default class WebglRenderer {
             state,
         );
 
+        // 绑定缓冲
+        this.bufferCache.bind(geometry, program, state);
+
         // 更新uniform变量
         if (material instanceof ShaderMaterial) {
             this.setupUniform(material.uniforms, program, state);
-        }
-
-        // 更新状态缓存
-        if (state.expire) {
-            state.expire = false;
-            this.stateCache.set(program, state);
         }
 
         // 绘制
@@ -270,12 +276,28 @@ export default class WebglRenderer {
                 { size, length } = position ?? { size: 0, length: 0 };
             this.gl.drawArrays(this.gl.TRIANGLES, 0, length / size);
         }
+
+        // 更新状态缓存
+        if (state.expire) {
+            state.expire = false;
+            this.state = state;
+            this.stateCache.set(program, state);
+        }
+    }
+
+    /**
+     * 渲染场景
+     * @param scene 
+     * @param camera 
+     */
+    public renderScene(scene: Scene, camera: Camera<any, any>): void {
+        scene.traverse((node) => { node instanceof Mesh && this.renderNode(node, camera) });
     }
 }
 
 interface IConfig {
     /**
-     * 渲染上下文
+     * webgl上下文
      */
     gl: GLSL.WebGLAllRenderingContext;
     /**

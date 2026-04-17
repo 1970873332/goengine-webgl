@@ -7,13 +7,9 @@ import WeakMapCache from "./base/WeakMap";
  */
 export default class StateCache extends WeakMapCache<WebGLProgram, IState> {
     /**
-     * 当前使用的着色器程序
+     * 纹理单元
      */
-    public currentProgram?: WebGLProgram;
-    /**
-     * 当前使用的纹理单元
-     */
-    public currentUnit: number = 0;
+    public unit: number = 0;
     /**
      * 最大纹理单元
      */
@@ -24,23 +20,13 @@ export default class StateCache extends WeakMapCache<WebGLProgram, IState> {
      */
     public get nextUnit(): number {
         return (
-            (this.currentUnit + 1) %
+            (this.unit + 1) %
             (this.maxUnit ??= this.gl.getParameter(
                 this.gl.MAX_COMBINED_TEXTURE_IMAGE_UNITS,
             ))
         );
     }
 
-    /**
-     * 使用着色器程序
-     * @param program
-     * @returns
-     */
-    public useProgram(program: WebGLProgram): void {
-        if (this.currentProgram === program) return;
-        this.gl.useProgram(program);
-        this.currentProgram = program;
-    }
     /**
      * 分配
      * @param program
@@ -86,7 +72,7 @@ export default class StateCache extends WeakMapCache<WebGLProgram, IState> {
      * 纹理单元步进
      */
     public stepUnit(): number {
-        return (this.currentUnit = this.nextUnit);
+        return (this.unit = this.nextUnit);
     }
 }
 

@@ -1,7 +1,7 @@
 import ResponseAttribute from "@core/object/attribute/Response";
 import { Euler, Vector3 } from "@core/object/math/Index";
 import { Vector3Type } from "@core/object/math/vector/Vector3";
-import { Matter2D } from "@core/object/physics/Index";
+import { Matter2D } from "@core/temp/physics/Index";
 import BaseGeometry from "@webgl/geometry/Base";
 import BaseMaterial from "@webgl/material/Base";
 import { Body, IBodyDefinition } from "matter-js";
@@ -44,7 +44,7 @@ export default class Collision2D<
      * 刚体
      */
     public rigidBody = new ResponseAttribute<
-        B | undefined
+        B | undefined, any
     >(void 0).bindCallback((prev, next) => {
         prev && this.removeToPhysics();
         next && this.appendToPhysics();

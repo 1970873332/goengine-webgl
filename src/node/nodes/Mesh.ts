@@ -1,4 +1,3 @@
-import ResponseAttribute from "@core/object/attribute/Response";
 import { BaseNodeSaveJSON } from "@core/object/Node";
 import BaseGeometry from "@webgl/geometry/Base";
 import BaseMaterial from "@webgl/material/Base";
@@ -21,28 +20,34 @@ export default class Mesh<
     constructor(geometry?: G, material?: M, config?: C) {
         super();
         config && this.setConfig(config);
-        this.geometry.silentSetter(geometry);
-        this.material.silentSetter(material);
+        Object.assign(this, { geometry, material });
     }
     /**
      * 几何
      */
-    public geometry = new ResponseAttribute<G | undefined>(
-        void 0,
-    );
+    public geometry: G | undefined;
     /**
      * 材质
      */
-    public material = new ResponseAttribute<M | undefined>(
-        void 0,
-    );
+    public material: M | undefined;
 
     public toJSON(): ISaveJSON {
         return {
             ...super.toJSON(),
-            geometryID: this.geometry.value?.uuid,
-            materialID: this.material.value?.uuid,
+            geometryID: this.geometry?.uuid,
+            materialID: this.material?.uuid,
         };
+    }
+
+    public copy(target: this): this {
+        const {
+            geometry,
+            material,
+        } = target;
+
+        Object.assign(this, { geometry, material });
+
+        return super.copy(target);
     }
 }
 

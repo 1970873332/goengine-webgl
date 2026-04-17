@@ -64,6 +64,7 @@ export default class CacheShader extends MapCache<ShaderState<any>> {
                 fragment: { id: fragmentID, char: fragmentChar },
             } = material;
             return {
+                id: `${vertexID}|${fragmentID}`,
                 vertex: this.storage(
                     this.gl.VERTEX_SHADER,
                     vertexID,
@@ -82,6 +83,7 @@ export default class CacheShader extends MapCache<ShaderState<any>> {
                 vertexChar: string = "",
                 fragmentChar: string = "";
             return {
+                id: `${vertexID}|${fragmentID}`,
                 vertex: this.storage(
                     this.gl.VERTEX_SHADER,
                     vertexID,

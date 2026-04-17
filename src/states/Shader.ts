@@ -47,11 +47,14 @@ export default class ShaderState<
      */
     public compiled(gl: GLSL.WebGLAllRenderingContext): this {
         if (this.complete) return this;
+        // 创建着色器
         if ((this.shader ??= gl.createShader(this.type))) {
+            // 上传着色器源代码
             if (!this.source) {
                 gl.shaderSource(this.shader, this.char);
                 this.source = !!gl.getShaderSource(this.shader);
             }
+            // 编译着色器
             if (!this.compile) {
                 gl.compileShader(this.shader);
                 this.compile = !!gl.getShaderParameter(
@@ -59,6 +62,7 @@ export default class ShaderState<
                     gl.COMPILE_STATUS,
                 );
             }
+            // 异常处理
             if (!(this.complete = this.source && this.compile)) {
                 console.error(gl.getShaderInfoLog(this.shader));
                 gl.deleteShader(this.shader);
