@@ -8,9 +8,9 @@ import BaseMaterial, { BaseMaterialSaveJSON } from "@webgl/material/Base";
 import BaseMeshMaterial, { BaseMeshMaterialSaveJSON } from "@webgl/material/Mesh";
 import BaseGLNode from "@webgl/node/Base";
 import { Collision2D } from "@webgl/node/Index";
-import { Collision2DSaveJSON } from "@webgl/node/nodes/Collision2D";
 import Mesh, { MeshConfig, MeshSaveJSON } from "@webgl/node/nodes/Mesh";
 import { SceneSaveJSON } from "@webgl/node/nodes/Scene";
+import { Collision2DSaveJSON } from "@webgl/temp/Collision2D";
 
 /**
  * 创建节点
@@ -61,7 +61,7 @@ export function createNodeByJSON(
         });
         return mesh;
     } else if (type === "Collision2D") {
-        const { geometryID, materialID, rigidBody } =
+        const { geometryID, materialID, body } =
             node as Collision2DSaveJSON;
         const collision = new Collision2D(
             void 0,
@@ -69,11 +69,11 @@ export function createNodeByJSON(
             void 0,
             meshConfig,
         );
-        const physicsBody = createPhysicsByJSON(rigidBody, physicss);
+        const physicsBody = createPhysicsByJSON(body, physicss);
         collision.geometry = createGeometryByJSON(geometryID, geometrys);
         collision.material = createMaterialByJSON(materialID, materials);
         physicsBody instanceof Matter2D &&
-            collision.rigidBody.setter(physicsBody);
+            collision.body.setter(physicsBody);
         collision.setBodyConfig({ position: meshConfig.position?.clone() });
         children.forEach((child: string) => {
             const childNode = createNodeByJSON(child, json);
@@ -131,13 +131,13 @@ export function createMaterialByJSON(
  * @returns
  */
 export function createPhysicsByJSON(
-    targetID: string | undefined,
+    targetID: string | number | undefined,
     physicss: BasePhysicsNodeSaveJSON[],
 ): BasePhysicsNode<any, any, any> | undefined {
     const physics = physicss.find((physics) => physics.uuid === targetID);
     if (!physics) return void 0;
     if (physics.type === "Matter2D") {
-        return new Matter2D(physics.config);
+        return new Matter2D(physics);
     }
 }
 

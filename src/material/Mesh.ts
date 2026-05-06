@@ -1,10 +1,10 @@
 import { Texture } from "three";
-import BaseMaterial, { BaseMaterialSaveJSON, MaterialConfig } from "./Base";
+import BaseMaterial, { BaseMaterialEvent, BaseMaterialSaveJSON, MaterialConfig } from "./Base";
 
 /**
  * 网格材质
  */
-export default class MeshMaterial<E extends {}> extends BaseMaterial<IConfig, E> {
+export default class MeshMaterial extends BaseMaterial<IConfig, IEvent> {
     /**
      * 是否是网格材质
      */
@@ -35,10 +35,12 @@ export default class MeshMaterial<E extends {}> extends BaseMaterial<IConfig, E>
 interface IConfig
     extends
     MaterialConfig,
-    Partial<Pick<MeshMaterial<any>, "texture" | "textureAlpha">> { }
+    Partial<Pick<MeshMaterial, "texture" | "textureAlpha">> { }
+
+interface IEvent extends BaseMaterialEvent { }
 
 interface ISaveJSON
-    extends BaseMaterialSaveJSON, Pick<MeshMaterial<any>, "textureAlpha"> { }
+    extends BaseMaterialSaveJSON, Pick<MeshMaterial, "textureAlpha"> { }
 
 export {
     IConfig as BaseMeshMaterialConfig,

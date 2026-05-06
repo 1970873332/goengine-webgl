@@ -2,15 +2,14 @@ import IdentityComponent from "@core/component/Identity";
 import { UniformType } from "@webgl/GLSL";
 import { def as fragDefault } from "@webgl/glsl/fragment/Index";
 import { def as vertDefault } from "@webgl/glsl/vertex/Index";
-import BaseMaterial, { MaterialConfig } from "./Base";
+import BaseMaterial, { BaseMaterialEvent, MaterialConfig } from "./Base";
 
 /**
  * 着色器材质
  */
 export default class ShaderMaterial<
-    T extends IUniforms,
-    E extends {}
-> extends BaseMaterial<IConfig<T>, E> {
+    T extends IUniforms
+> extends BaseMaterial<IConfig<T>, IEvent> {
     constructor(config?: IConfig<T>) {
         super();
         config && this.setConfig(config);
@@ -51,6 +50,8 @@ interface IConfig<T extends IUniforms> extends MaterialConfig {
      */
     fragment?: string;
 }
+
+interface IEvent extends BaseMaterialEvent { }
 
 interface IAttribute {
     /**

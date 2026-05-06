@@ -1,10 +1,10 @@
 import { Vector2, Vector4 } from "@core/object/math/Index";
-import Camera, { CameraConfig } from "./Camera";
+import Camera, { CameraConfig, CameraEvent } from "./Camera";
 
 /**
  * 正交相机
  */
-export default class OrthographicCamera<E extends {}> extends Camera<IConfig, E> {
+export default class OrthographicCamera extends Camera<IConfig, IEvent> {
     /**
      * 是否是正交相机
      */
@@ -131,6 +131,8 @@ interface IConfig extends CameraConfig {
      */
     far?: number;
 }
+
+interface IEvent extends CameraEvent { }
 
 export { IConfig as isOrthographicCameraConfig };
 

@@ -1,9 +1,9 @@
-import BaseGLNode, { BaseGLNodeConfig } from "../Base";
+import BaseGLNode, { BaseGLNodeConfig, BaseGLNodeEvent } from "../Base";
 
 /**
  * 组
  */
-export default class Group extends BaseGLNode<IConfig, {}> {
+export default class Group extends BaseGLNode<IConfig, IEvent> {
     /**
      * 是否是组
      */
@@ -16,3 +16,5 @@ export default class Group extends BaseGLNode<IConfig, {}> {
 }
 
 interface IConfig extends BaseGLNodeConfig { }
+
+interface IEvent extends BaseGLNodeEvent { }

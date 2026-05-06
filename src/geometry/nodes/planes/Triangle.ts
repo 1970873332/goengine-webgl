@@ -1,12 +1,13 @@
 import ArrayAttribute from "@core/object/attribute/Array";
 import { Vector2 } from "@core/object/math/Index";
 import BaseGeometry, { BaseGeometryAttribute, BaseGeometryConfig, BaseGeometrySaveJSON } from "@webgl/geometry/Base";
+import { BaseGLNodeEvent } from "@webgl/node/Base";
 
 
 /**
  * 三角几何体
  */
-export default class TriangleGeometry<E extends {}> extends BaseGeometry<IConfig, E> {
+export default class TriangleGeometry extends BaseGeometry<IConfig, IEvent> {
     /**
      * 是否是三角几何体
      */
@@ -103,6 +104,8 @@ interface IConfig extends BaseGeometryConfig {
      */
     height?: number;
 }
+
+interface IEvent extends BaseGLNodeEvent { }
 
 interface ISaveJSON extends BaseGeometrySaveJSON {
     /**

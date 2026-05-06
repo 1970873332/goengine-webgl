@@ -1,10 +1,10 @@
 import { Vector4 } from "@core/object/math/Index";
-import Camera, { CameraConfig } from "./Camera";
+import Camera, { CameraConfig, CameraEvent } from "./Camera";
 
 /**
  * 透视相机
  */
-export default class PerspectiveCamera<E extends {}> extends Camera<IConfig, E> {
+export default class PerspectiveCamera extends Camera<IConfig, IEvent> {
     /**
      * 是否是透视相机
      */
@@ -110,6 +110,8 @@ interface IConfig extends CameraConfig {
      */
     far?: number;
 }
+
+interface IEvent extends CameraEvent { }
 
 export { IConfig as IPerspectiveCameraConfig };
 

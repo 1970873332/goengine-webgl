@@ -1,10 +1,10 @@
 import { BaseNodeSaveJSON } from "@core/object/Node";
-import BaseGLNode, { BaseGLNodeConfig } from "../Base";
+import BaseGLNode, { BaseGLNodeConfig, BaseGLNodeEvent } from "../Base";
 
 /**
  * 场景
  */
-export default class Scene extends BaseGLNode<IConfig, {}> {
+export default class Scene extends BaseGLNode<IConfig, IEvent> {
     /**
      * 是否是场景
      */
@@ -17,6 +17,8 @@ export default class Scene extends BaseGLNode<IConfig, {}> {
 }
 
 interface IConfig extends BaseGLNodeConfig { }
+
+interface IEvent extends BaseGLNodeEvent { }
 
 interface ISaveJSON extends BaseNodeSaveJSON { }
 

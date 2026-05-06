@@ -5,7 +5,7 @@ import { Matter2D } from "@core/temp/physics/Index";
 import BaseGeometry from "@webgl/geometry/Base";
 import BaseMaterial from "@webgl/material/Base";
 import { Body, IBodyDefinition } from "matter-js";
-import Mesh, { MeshConfig, MeshSaveJSON } from "./Mesh";
+import Mesh, { MeshConfig, MeshSaveJSON } from "../node/nodes/Mesh";
 
 /**
  * 2D碰撞
@@ -13,7 +13,7 @@ import Mesh, { MeshConfig, MeshSaveJSON } from "./Mesh";
 export default class Collision2D<
     G extends BaseGeometry<any, any>,
     M extends BaseMaterial<any, any>,
-    B extends Matter2D<any, any>,
+    B extends Matter2D,
     C extends IConfig,
     E extends {}
 > extends Mesh<G, M, C, E> {
@@ -22,14 +22,10 @@ export default class Collision2D<
      */
     public readonly isCollision2D: boolean = true;
 
-    /**
-     * 物理
-     */
-    protected physics_source?: IPhysics;
-
     constructor(geometry?: G, material?: M, body?: B, config?: C) {
         super(geometry, material, config);
-        this.rigidBody.setter(body);
+
+        this.body.setter(body);
         this.setBodyConfig({
             position: config?.position?.clone(),
         });
@@ -39,26 +35,20 @@ export default class Collision2D<
     /**
      * 是否跟随物理世界
      */
-    public autoFollowBody: boolean = true;
+    public autofollow: boolean = true;
     /**
      * 刚体
      */
-    public rigidBody = new Value<
+    public body = new Value<
         B | undefined
     >(void 0).bindCallback((prev, next) => {
         prev && this.removeToPhysics();
         next && this.appendToPhysics();
     });
-
     /**
      * 物理
      */
-    public get physics(): IPhysics | undefined {
-        return this.physics_source;
-    }
-    protected set physics(v: IPhysics | undefined) {
-        this.physics_source = v;
-    }
+    public readonly physics = new Value<IPhysics | undefined>(void 0);
 
     /**
      * 绑定物理世界
@@ -66,7 +56,7 @@ export default class Collision2D<
      * @returns
      */
     public bindPhysics(physics: IPhysics): this {
-        this.physics = physics;
+        this.physics.value = physics;
         this.appendToPhysics();
         return this;
     }
@@ -75,38 +65,49 @@ export default class Collision2D<
      */
     public unbindPhysics(): this {
         this.removeToPhysics();
-        delete this.physics;
+        this.physics.value = void 0;
         return this;
     }
     /**
      * 添加到物理世界
      */
     public appendToPhysics(): void {
-        this.physics &&
-            this.rigidBody.value &&
-            this.physics.add(this.rigidBody.value.body);
+        this.physics.value &&
+            this.body.value &&
+            this.physics.value.add(this.body.value.body);
     }
     /**
      * 从物理世界移除
      */
     public removeToPhysics(): void {
-        this.physics &&
-            this.rigidBody.value &&
-            this.physics.remove(this.rigidBody.value.body);
+        this.physics.value &&
+            this.body.value &&
+            this.physics.value.remove(this.body.value.body);
     }
     /**
      * 跟随物理世界
      * @returns
      */
     public followBody(): void {
-        if (!this.rigidBody.value) return;
+        const {
+            value: bodyValue
+        } = this.body;
+
+        if (!bodyValue?.body.value) return;
+
+        const {
+            body: {
+                value
+            }
+        } = bodyValue;
+
         this.position.copy(
             new Vector3(
-                this.rigidBody.value.body.position.x,
-                -this.rigidBody.value.body.position.y,
+                value.position.x,
+                -value.position.y,
             ),
         );
-        this.rotation.copy(new Euler(0, 0, -this.rigidBody.value.body.angle));
+        this.rotation.copy(new Euler(0, 0, -value.angle));
     }
     /**
      * 设置刚体配置
@@ -116,13 +117,26 @@ export default class Collision2D<
     public setBodyConfig(
         config: Pick<IBodyDefinition, "position" | "angle">,
     ): this {
-        if (this.rigidBody.value) {
-            const body: Body = this.rigidBody.value.body;
+        const {
+            value
+        } = this.body;
+        if (value?.body.value) {
+            const body: Body = value.body.value;
             config.position && Body.setPosition(body, config.position);
             config.angle && Body.setAngle(body, config.angle);
-            this.autoFollowBody && this.followBody();
+            this.autofollow && this.followBody();
         }
         return this;
+    }
+
+    public setConfig(config: C): void {
+        super.setConfig(config);
+
+        const {
+            autofollow
+        } = config;
+
+        this.autofollow = autofollow ?? this.autofollow;
     }
 
     public unbindParent(): this {
@@ -138,11 +152,11 @@ export default class Collision2D<
             ...Rest,
             position: position.map((item: number, index: number) => {
                 const resultItem: number = index === 1 ? -item : item;
-                return this.rigidBody.value?.body.isStatic
+                return this.body.value?.body.value?.isStatic
                     ? resultItem
                     : Math.trunc(resultItem);
             }) as Vector3Type,
-            rigidBody: this.rigidBody.value?.uuid,
+            body: this.body.value?.body.value?.id,
         };
     }
 }
@@ -151,14 +165,14 @@ interface IConfig extends MeshConfig {
     /**
      * 是否自动跟随刚体
      */
-    autoFollowBody?: boolean;
+    autofollow?: boolean;
 }
 
 interface ISaveJSON extends MeshSaveJSON {
     /**
      * 刚体
      */
-    rigidBody?: string;
+    body?: string | number;
 }
 
 interface IPhysics {

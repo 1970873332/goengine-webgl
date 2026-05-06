@@ -36,5 +36,5 @@ interface IEvent extends BaseGLNodeEvent { }
 
 interface IConfig extends BaseGLNodeConfig { }
 
-export { IConfig as CameraConfig };
+export { IConfig as CameraConfig, IEvent as CameraEvent };
 
