@@ -20,6 +20,7 @@ export default abstract class BaseGLNode<
 
     public setConfig(config: C): void {
         super.setConfig(config);
+
         config.up && this.up.copy(config.up);
     }
 

@@ -6,7 +6,7 @@ import BaseGeometry, { BaseGeometryAttribute, BaseGeometryConfig, BaseGeometrySa
 /**
  * 三角几何体
  */
-export default class TriangleGeometry<E extends Record<any, any>> extends BaseGeometry<IConfig, E> {
+export default class TriangleGeometry<E extends {}> extends BaseGeometry<IConfig, E> {
     /**
      * 是否是三角几何体
      */
@@ -20,7 +20,7 @@ export default class TriangleGeometry<E extends Record<any, any>> extends BaseGe
     /**
      * 默认尺寸
      */
-    public static readonly size = new Vector2(1, 1);
+    public static readonly size = Vector2.one();
     /**
      * 默认位置
      */

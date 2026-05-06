@@ -57,7 +57,7 @@ export default class CacheShader extends MapCache<ShaderState<any>> {
      * 分配
      * @param material
      */
-    public allocate(material: BaseMaterial<any, any>): GLSL.Shader<ShaderState<any>> {
+    public allocate(material: Instance<typeof BaseMaterial>): GLSL.Shader<ShaderState<any>> {
         if (material instanceof ShaderMaterial) {
             const {
                 vertex: { id: vertexID, char: vertexChar },

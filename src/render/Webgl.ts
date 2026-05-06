@@ -7,7 +7,6 @@ import ShaderCache from "../cache/Shader";
 import StateCache, { State } from "../cache/State";
 import TextureCache from "../cache/Texture";
 import Camera from "../camera/Camera";
-import BaseGeometry from "../geometry/Base";
 import BaseMaterial from "../material/Base";
 import ShaderMaterial, { ShaderMaterialUniform } from "../material/Shader";
 import { Mesh, Scene } from "../node/Index";
@@ -90,7 +89,7 @@ export default class WebglRenderer {
      * @param state
      * @param material
      */
-    protected applyRenderMode(state: State, material: BaseMaterial<any, any>): void {
+    protected applyRenderMode(state: State, material: Instance<typeof BaseMaterial>): void {
         const { transparent, depthTest, depthWrite, side, blending } = material;
 
         // 混合
@@ -211,11 +210,11 @@ export default class WebglRenderer {
      * @param camera
      * @returns
      */
-    public renderNode(node: Mesh<any, any, any, any>, camera: Camera<any, any>): void {
+    public renderNode(node: Instance<typeof Mesh>, camera: Instance<typeof Camera>): void {
         const {
             material,
             geometry,
-        } = node as Mesh<BaseGeometry<any, any>, BaseMaterial<any, any>, any, any>;
+        } = node;
         if (!material || !geometry) return;
         const // 分配着色器
             shader: GLSL.Shader<ShaderState<any>> =
@@ -290,7 +289,7 @@ export default class WebglRenderer {
      * @param scene 
      * @param camera 
      */
-    public renderScene(scene: Scene, camera: Camera<any, any>): void {
+    public renderScene(scene: Scene, camera: Instance<typeof Camera>): void {
         scene.traverse((node) => { node instanceof Mesh && this.renderNode(node, camera) });
     }
 }

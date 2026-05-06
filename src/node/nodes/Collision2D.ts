@@ -1,4 +1,4 @@
-import ResponseAttribute from "@core/object/attribute/Response";
+import Value from "@core/object/attribute/Value";
 import { Euler, Vector3 } from "@core/object/math/Index";
 import { Vector3Type } from "@core/object/math/vector/Vector3";
 import { Matter2D } from "@core/temp/physics/Index";
@@ -15,7 +15,7 @@ export default class Collision2D<
     M extends BaseMaterial<any, any>,
     B extends Matter2D<any, any>,
     C extends IConfig,
-    E extends Record<any, any>
+    E extends {}
 > extends Mesh<G, M, C, E> {
     /**
      * 是否是碰撞2D
@@ -29,7 +29,7 @@ export default class Collision2D<
 
     constructor(geometry?: G, material?: M, body?: B, config?: C) {
         super(geometry, material, config);
-        this.rigidBody.silentSetter(body);
+        this.rigidBody.setter(body);
         this.setBodyConfig({
             position: config?.position?.clone(),
         });
@@ -43,8 +43,8 @@ export default class Collision2D<
     /**
      * 刚体
      */
-    public rigidBody = new ResponseAttribute<
-        B | undefined, any
+    public rigidBody = new Value<
+        B | undefined
     >(void 0).bindCallback((prev, next) => {
         prev && this.removeToPhysics();
         next && this.appendToPhysics();

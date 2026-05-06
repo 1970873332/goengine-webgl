@@ -9,7 +9,7 @@ import BaseMaterial, { MaterialConfig } from "./Base";
  */
 export default class ShaderMaterial<
     T extends IUniforms,
-    E extends Record<any, any>
+    E extends {}
 > extends BaseMaterial<IConfig<T>, E> {
     constructor(config?: IConfig<T>) {
         super();

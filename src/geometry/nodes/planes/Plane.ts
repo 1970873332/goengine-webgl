@@ -6,7 +6,7 @@ import BaseGeometry, { BaseGeometryAttribute, BaseGeometryConfig, BaseGeometrySa
 /**
  * 平面几何体
  */
-export default class PlaneGeometry<E extends Record<any, any>> extends BaseGeometry<IConfig, E> {
+export default class PlaneGeometry<E extends {}> extends BaseGeometry<IConfig, E> {
     /**
      * 是否是平面几何体
      */
@@ -20,7 +20,7 @@ export default class PlaneGeometry<E extends Record<any, any>> extends BaseGeome
     /**
      * 默认尺寸
      */
-    public static readonly size = new Vector2(1, 1);
+    public static readonly size = Vector2.one();
     /**
      * 默认位置
      */

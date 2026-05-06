@@ -4,7 +4,7 @@ import BaseGLNode, { BaseGLNodeConfig } from "../Base";
 /**
  * 场景
  */
-export default class Scene extends BaseGLNode<IConfig, Record<any, any>> {
+export default class Scene extends BaseGLNode<IConfig, {}> {
     /**
      * 是否是场景
      */

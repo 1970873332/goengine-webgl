@@ -4,7 +4,7 @@ import Camera, { CameraConfig } from "./Camera";
 /**
  * 透视相机
  */
-export default class PerspectiveCamera<E extends Record<any, any>> extends Camera<IConfig, E> {
+export default class PerspectiveCamera<E extends {}> extends Camera<IConfig, E> {
     /**
      * 是否是透视相机
      */

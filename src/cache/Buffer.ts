@@ -22,7 +22,7 @@ export default class BufferCache extends WeakMapCache<ArrayBuffer, WebGLBuffer> 
      * @param geometry
      */
     public bind(
-        geometry: BaseGeometry<any, any>,
+        geometry: Instance<typeof BaseGeometry>,
         program: WebGLProgram,
         state: State,
     ): void {

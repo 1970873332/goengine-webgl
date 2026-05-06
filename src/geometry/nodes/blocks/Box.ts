@@ -6,7 +6,7 @@ import BaseGeometry, { BaseGeometryAttribute, BaseGeometryConfig, BaseGeometrySa
 /**
  * 立方几何体
  */
-export default class BoxGeometry<E extends Record<any, any>> extends BaseGeometry<IConfig, E> {
+export default class BoxGeometry<E extends {}> extends BaseGeometry<IConfig, E> {
     /**
      * 是否是立方几何体
      */
@@ -20,7 +20,7 @@ export default class BoxGeometry<E extends Record<any, any>> extends BaseGeometr
     /**
      * 默认尺寸
      */
-    public static readonly size = new Vector3(1, 1, 1);
+    public static readonly size = Vector3.one();
     /**
      * 默认位置
      */

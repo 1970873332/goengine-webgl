@@ -3,7 +3,7 @@ import BaseGLNode, { BaseGLNodeConfig } from "../Base";
 /**
  * 组
  */
-export default class Group extends BaseGLNode<IConfig, Record<any, any>> {
+export default class Group extends BaseGLNode<IConfig, {}> {
     /**
      * 是否是组
      */

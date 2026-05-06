@@ -4,7 +4,7 @@ import BaseMaterial, { BaseMaterialSaveJSON, MaterialConfig } from "./Base";
 /**
  * 网格材质
  */
-export default class MeshMaterial<E extends Record<any, any>> extends BaseMaterial<IConfig, E> {
+export default class MeshMaterial<E extends {}> extends BaseMaterial<IConfig, E> {
     /**
      * 是否是网格材质
      */

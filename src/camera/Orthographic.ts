@@ -4,7 +4,7 @@ import Camera, { CameraConfig } from "./Camera";
 /**
  * 正交相机
  */
-export default class OrthographicCamera<E extends Record<any, any>> extends Camera<IConfig, E> {
+export default class OrthographicCamera<E extends {}> extends Camera<IConfig, E> {
     /**
      * 是否是正交相机
      */

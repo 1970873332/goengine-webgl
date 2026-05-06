@@ -10,7 +10,7 @@ export default abstract class GLMap extends CanvasComponent<IEvent> {
     /**
      * 相机
      */
-    public declare camera: Camera<any, any>;
+    public declare camera: Instance<typeof Camera>;
     /**
      * 渲染器
      */

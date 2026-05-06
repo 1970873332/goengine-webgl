@@ -10,7 +10,7 @@ export default class Mesh<
     G extends BaseGeometry<any, any>,
     M extends BaseMaterial<any, any>,
     C extends IConfig,
-    E extends Record<any, any>
+    E extends {}
 > extends BaseGLNode<C, E> {
     /**
      * 是否是网格
@@ -25,11 +25,11 @@ export default class Mesh<
     /**
      * 几何
      */
-    public geometry: G | undefined;
+    public geometry?: G;
     /**
      * 材质
      */
-    public material: M | undefined;
+    public material?: M;
 
     public toJSON(): ISaveJSON {
         return {
