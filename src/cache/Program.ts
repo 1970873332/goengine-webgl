@@ -15,7 +15,7 @@ export default class ProgramCache extends MapCache<WebGLProgram> {
     ): WebGLProgram | undefined {
         if (this.has(shader.id)) return this.get(shader.id)!;
         const program: WebGLProgram = this.gl.createProgram(),
-            { vertex: { shader: vertexShader }, fragment: { shader: fragmentShader } } = shader;
+            { vertex: { shader: { value: vertexShader } }, fragment: { shader: { value: fragmentShader } } } = shader;
         vertexShader && this.gl.attachShader(program, vertexShader);
         fragmentShader && this.gl.attachShader(program, fragmentShader);
         this.gl.linkProgram(program);

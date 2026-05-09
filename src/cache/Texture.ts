@@ -1,4 +1,4 @@
-import { Texture } from "three";
+import Texture from "@webgl/states/Texture";
 import MapCache from "./base/Map";
 
 /**
@@ -9,28 +9,22 @@ export default class TextureCache extends MapCache<WebGLTexture> {
      * 默认纹理
      */
     protected declare defaultTexture: WebGLTexture;
-    /**
-     * 获取纹理
-     */
-    public texture(): WebGLTexture {
-        return this.defaultTexture ??= this.gl.createTexture();
-    }
 
     /**
      * 分配
      * @param target
      * @returns
      */
-    public allocate(target: Texture, unit: number): WebGLTexture {
-        const { uuid, image } = target;
+    public allocate(texture: Instance<typeof Texture>, unit: number): WebGLTexture {
+        const { uuid, target } = texture;
         if (this.has(uuid)) return this.get(uuid)!;
+        if (!(target instanceof HTMLImageElement) || !target.complete) return this.defaultTexture;
 
-        const texture: WebGLTexture = this.texture();
-        if (!(image instanceof HTMLImageElement)) return texture;
+        const webgltexture: WebGLTexture = this.gl.createTexture();
 
         // 绑定纹理
         this.gl.activeTexture(this.gl.TEXTURE0 + unit);
-        this.gl.bindTexture(this.gl.TEXTURE_2D, texture);
+        this.gl.bindTexture(this.gl.TEXTURE_2D, webgltexture);
         // Y轴翻转纹理
         this.gl.pixelStorei(this.gl.UNPACK_FLIP_Y_WEBGL, true);
         // 加载纹理
@@ -40,7 +34,7 @@ export default class TextureCache extends MapCache<WebGLTexture> {
             this.gl.RGBA,
             this.gl.RGBA,
             this.gl.UNSIGNED_BYTE,
-            image,
+            target,
         );
         // 生成mipmap
         this.gl.generateMipmap(this.gl.TEXTURE_2D);
@@ -82,7 +76,7 @@ export default class TextureCache extends MapCache<WebGLTexture> {
                     ),
                 ), // 4x各向异性过滤
             );
-        this.set(uuid, texture);
-        return texture;
+        this.set(uuid, webgltexture);
+        return webgltexture;
     }
 }

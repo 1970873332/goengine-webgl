@@ -34,6 +34,8 @@ export default class PerspectiveCamera extends Camera<IConfig, IEvent> {
             config?.far ?? this.config.far,
             true,
         );
+
+        this.updateProjectionMatrix();
     }
 
     public updateProjectionMatrix(): void {
@@ -74,7 +76,7 @@ export default class PerspectiveCamera extends Camera<IConfig, IEvent> {
         return this;
     }
 
-    public copy(target: this, update?: boolean): this {
+    public copy(target: this): this {
         const { fov, aspect, near, far } = target.config;
         this.setConfig({
             fov,
@@ -82,7 +84,6 @@ export default class PerspectiveCamera extends Camera<IConfig, IEvent> {
             near,
             far,
         });
-        !update && this.updateProjectionMatrix();
         return this;
     }
 

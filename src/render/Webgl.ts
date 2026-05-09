@@ -1,6 +1,6 @@
 import { Matrix4 } from "@core/object/math/Index";
 import { BlendType, SideType, UniformKey, UniformType } from "@webgl/GLSL";
-import { Texture } from "three";
+import Texture from "@webgl/states/Texture";
 import BufferCache from "../cache/Buffer";
 import ProgramCache from "../cache/Program";
 import ShaderCache from "../cache/Shader";
@@ -178,7 +178,7 @@ export default class WebglRenderer {
             switch (type) {
                 case UniformType.Texture:
                     const texture: WebGLTexture = this.textureCache.allocate(
-                        value as Texture,
+                        value as Instance<typeof Texture>,
                         this.stateCache.nextUnit,
                     );
                     let unit: number = state.texture.list.indexOf(texture);
@@ -186,12 +186,11 @@ export default class WebglRenderer {
                         if (unit === -1) {
                             state.expire = true;
                             state.texture.list[
-                                (unit = this.stateCache.stepUnit() - 1)
+                                (unit = this.stateCache.stepUnit())
                             ] = texture;
-                        } else {
-                            this.gl.activeTexture(this.gl.TEXTURE0 + unit);
-                            this.gl.bindTexture(this.gl.TEXTURE_2D, texture);
                         }
+                        this.gl.activeTexture(this.gl.TEXTURE0 + unit);
+                        this.gl.bindTexture(this.gl.TEXTURE_2D, texture);
                     }
                     this.gl.uniform1i(location, unit);
                     break;

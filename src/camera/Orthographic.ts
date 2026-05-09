@@ -45,6 +45,8 @@ export default class OrthographicCamera extends Camera<IConfig, IEvent> {
             config?.left ?? this.viewConfig.left,
             true,
         );
+
+        this.updateProjectionMatrix();
     }
 
     public updateProjectionMatrix(): void {
@@ -83,7 +85,7 @@ export default class OrthographicCamera extends Camera<IConfig, IEvent> {
         return this;
     }
 
-    public copy(target: this, update?: boolean): this {
+    public copy(target: this): this {
         const { near, far } = target.config,
             { top, right, bottom, left } = target.viewConfig;
         this.setConfig({
@@ -94,7 +96,6 @@ export default class OrthographicCamera extends Camera<IConfig, IEvent> {
             bottom,
             left,
         });
-        !update && this.updateProjectionMatrix();
         return this;
     }
 

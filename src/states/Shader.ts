@@ -1,4 +1,5 @@
 import IdentityComponent from "@core/component/Identity";
+import Value from "@core/object/attribute/Value";
 
 /**
  * 着色器状态
@@ -6,11 +7,6 @@ import IdentityComponent from "@core/component/Identity";
 export default class ShaderState<
     E extends IEvent,
 > extends IdentityComponent<E> {
-    /**
-     * 着色器
-     */
-    protected declare shader_source: WebGLShader | null;
-
     constructor(
         public readonly type: GLenum,
         char: string,
@@ -31,16 +27,10 @@ export default class ShaderState<
      * 是否完成
      */
     public complete: boolean = false;
-
     /**
      * 着色器
      */
-    public get shader(): WebGLShader | null {
-        return this.shader_source;
-    }
-    protected set shader(v: WebGLShader | null) {
-        this.shader_source = v;
-    }
+    public readonly shader = new Value<WebGLShader | null>(null);
 
     /**
      * 编译
@@ -48,25 +38,30 @@ export default class ShaderState<
     public compiled(gl: GLSL.WebGLAllRenderingContext): this {
         if (this.complete) return this;
         // 创建着色器
-        if ((this.shader ??= gl.createShader(this.type))) {
+        if ((this.shader.value ??= gl.createShader(this.type))) {
+            const {
+                shader: {
+                    value: shader
+                },
+            } = this;
             // 上传着色器源代码
             if (!this.source) {
-                gl.shaderSource(this.shader, this.char);
-                this.source = !!gl.getShaderSource(this.shader);
+                gl.shaderSource(shader, this.char);
+                this.source = !!gl.getShaderSource(shader);
             }
             // 编译着色器
             if (!this.compile) {
-                gl.compileShader(this.shader);
+                gl.compileShader(shader);
                 this.compile = !!gl.getShaderParameter(
-                    this.shader,
+                    shader,
                     gl.COMPILE_STATUS,
                 );
             }
             // 异常处理
             if (!(this.complete = this.source && this.compile)) {
-                console.error(gl.getShaderInfoLog(this.shader));
-                gl.deleteShader(this.shader);
-                this.shader = null;
+                console.error(gl.getShaderInfoLog(shader));
+                gl.deleteShader(shader);
+                this.shader.value = null;
             }
         }
         return this;
