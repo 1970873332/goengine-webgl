@@ -1,14 +1,14 @@
-import { base as BaseFragment } from "../glsl/fragment/Index";
-import { base as BaseVertex } from "../glsl/vertex/Index";
-import BaseMaterial from "../material/Base";
-import ShaderMaterial from "../material/Shader";
-import ShaderState from "../states/Shader";
+import { BaseMaterialAny } from "@goengine/webgl/src/material/Base";
+import { BASE_FRAG } from "../glsl/fragment/Index";
+import { BASE_VERT } from "../glsl/vertex/Index";
+import ShaderMaterial from "../material/node/Shader";
+import ShaderState, { ShaderStateAny } from "../state/Shader";
 import MapCache from "./base/Map";
 
 /**
  * 着色器缓存
  */
-export default class CacheShader extends MapCache<ShaderState<any>> {
+export default class CacheShader extends MapCache<ShaderStateAny> {
     /**
      * 顶点着色器ID
      * @param name
@@ -31,23 +31,19 @@ export default class CacheShader extends MapCache<ShaderState<any>> {
      * @param id
      * @param char
      */
-    protected storage(type: GLenum, id: string, char: string): ShaderState<any> {
+    protected storage(type: GLenum, id: string, char: string): ShaderStateAny {
         if (this.has(id)) return this.get(id)!;
         const base: string = (() => {
-            switch (type) {
-                case this.gl.VERTEX_SHADER:
-                    return BaseVertex;
-                case this.gl.FRAGMENT_SHADER:
-                    return BaseFragment;
-                default:
-                    throw new Error(`未知的着色器类型: ${type}`);
-            }
-        })(),
-            shader: ShaderState<any> = new ShaderState(
-                type,
-                `${base}\n${char}`.trim(),
-                id,
-            )
+                switch (type) {
+                    case this.gl.VERTEX_SHADER:
+                        return BASE_VERT;
+                    case this.gl.FRAGMENT_SHADER:
+                        return BASE_FRAG;
+                    default:
+                        throw new Error(`未知的着色器类型: ${type}`);
+                }
+            })(),
+            shader = new ShaderState(type, `${base}\n${char}`.trim(), id)
                 .trust()
                 .compiled(this.gl);
         shader.complete && this.set(id, shader);
@@ -57,7 +53,7 @@ export default class CacheShader extends MapCache<ShaderState<any>> {
      * 分配
      * @param material
      */
-    public allocate(material: Instance<typeof BaseMaterial>): GLSL.Shader<ShaderState<any>> {
+    public allocate(material: BaseMaterialAny): WebGL.Shader<ShaderStateAny> {
         if (material instanceof ShaderMaterial) {
             const {
                 vertex: { id: vertexID, char: vertexChar },

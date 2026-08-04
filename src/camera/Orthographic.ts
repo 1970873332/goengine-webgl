@@ -1,4 +1,5 @@
-import { Vector2, Vector4 } from "@core/object/math/Index";
+import Vector2 from "@goengine/core/src/object/math/vector/Vector2";
+import Vector4 from "@goengine/core/src/object/math/vector/Vector4";
 import Camera, { CameraConfig, CameraEvent } from "./Camera";
 
 /**
@@ -6,15 +7,14 @@ import Camera, { CameraConfig, CameraEvent } from "./Camera";
  */
 export default class OrthographicCamera extends Camera<IConfig, IEvent> {
     /**
-     * 是否是正交相机
+     * 正交相机
+     * @param config 配置
      */
-    public readonly isOrthographicCamera: boolean = true;
-
     constructor(config?: IConfig) {
         super();
+
         config && this.setConfig(config);
     }
-
     /**
      * 配置
      */
@@ -24,27 +24,25 @@ export default class OrthographicCamera extends Camera<IConfig, IEvent> {
     /**
      * 视角配置
      */
-    public readonly viewConfig = new Vector4(
-        1,
-        1,
-        -1,
-        -1,
-    ).bindCallback(this.updateProjectionMatrix.bind(this));
+    public readonly viewConfig = new Vector4(1, 1, -1, -1).bindCallback(
+        this.updateProjectionMatrix.bind(this),
+    );
 
     public setConfig(config: IConfig): void {
         super.setConfig(config);
-        this.config.set(
-            config?.near ?? this.config.near,
-            config?.far ?? this.config.far,
-            true,
-        );
-        this.viewConfig.set(
-            config?.top ?? this.viewConfig.top,
-            config?.right ?? this.viewConfig.right,
-            config?.bottom ?? this.viewConfig.bottom,
-            config?.left ?? this.viewConfig.left,
-            true,
-        );
+
+        const {
+            far = this.config.far,
+            near = this.config.near,
+
+            top = this.viewConfig.top,
+            left = this.viewConfig.left,
+            right = this.viewConfig.right,
+            bottom = this.viewConfig.bottom,
+        } = config;
+
+        this.config.set(near, far, true);
+        this.viewConfig.set(top, right, bottom, left, true);
 
         this.updateProjectionMatrix();
     }
@@ -85,24 +83,13 @@ export default class OrthographicCamera extends Camera<IConfig, IEvent> {
         return this;
     }
 
-    public copy(target: this): this {
-        const { near, far } = target.config,
-            { top, right, bottom, left } = target.viewConfig;
-        this.setConfig({
-            near,
-            far,
-            top,
-            right,
-            bottom,
-            left,
-        });
-        return this;
-    }
+    public copy(target: this, silence?: boolean): this {
+        const { config, viewConfig } = target;
 
-    public reInit(): void {
-        super.reInit();
-        this.config.reBindCallback(true, this.updateProjectionMatrix.bind(this));
-        this.viewConfig.reBindCallback(true, this.updateProjectionMatrix.bind(this));
+        this.config.copy(config, true);
+        this.viewConfig.copy(viewConfig, true);
+
+        return super.copy(target, silence);
     }
 }
 
@@ -133,7 +120,6 @@ interface IConfig extends CameraConfig {
     far?: number;
 }
 
-interface IEvent extends CameraEvent { }
+interface IEvent extends CameraEvent {}
 
 export { IConfig as isOrthographicCameraConfig };
-

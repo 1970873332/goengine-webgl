@@ -1,4 +1,4 @@
-import { AttributeKey, BlendType, SideType } from "@webgl/GLSL";
+import { AttributeKey, BlendType, SideType } from "@goengine/webgl/src/GLSL";
 import { BaseGeometryAttribute } from "../geometry/Base";
 import WeakMapCache from "./base/WeakMap";
 
@@ -161,4 +161,3 @@ type TLocation = {
 };
 
 export { IState as State };
-

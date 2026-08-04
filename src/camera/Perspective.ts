@@ -1,4 +1,4 @@
-import { Vector4 } from "@core/object/math/Index";
+import Vector4 from "@goengine/core/src/object/math/vector/Vector4";
 import Camera, { CameraConfig, CameraEvent } from "./Camera";
 
 /**
@@ -6,34 +6,32 @@ import Camera, { CameraConfig, CameraEvent } from "./Camera";
  */
 export default class PerspectiveCamera extends Camera<IConfig, IEvent> {
     /**
-     * 是否是透视相机
+     * 透视相机
+     * @param config 配置
      */
-    public readonly isPerspectiveCamera: boolean = true;
-
     constructor(config?: IConfig) {
         super();
+
         config && this.setConfig(config);
     }
-
     /**
      * 配置
      */
-    public readonly config = new Vector4(
-        35,
-        1,
-        0.1,
-        1000,
-    ).bindCallback(this.updateProjectionMatrix.bind(this));
+    public readonly config = new Vector4(35, 1, 0.1, 1000).bindCallback(
+        this.updateProjectionMatrix.bind(this),
+    );
 
     public setConfig(config: IConfig): void {
         super.setConfig(config);
-        this.config.set(
-            config?.fov ?? this.config.fov,
-            config?.aspect ?? this.config.aspect,
-            config?.near ?? this.config.near,
-            config?.far ?? this.config.far,
-            true,
-        );
+
+        const {
+            fov = this.config.fov,
+            far = this.config.far,
+            near = this.config.near,
+            aspect = this.config.aspect,
+        } = config;
+
+        this.config.set(fov, aspect, near, far, true);
 
         this.updateProjectionMatrix();
     }
@@ -76,20 +74,12 @@ export default class PerspectiveCamera extends Camera<IConfig, IEvent> {
         return this;
     }
 
-    public copy(target: this): this {
-        const { fov, aspect, near, far } = target.config;
-        this.setConfig({
-            fov,
-            aspect,
-            near,
-            far,
-        });
-        return this;
-    }
+    public copy(target: this, silence?: boolean): this {
+        const { config } = target;
 
-    public reInit(): void {
-        super.reInit();
-        this.config.reBindCallback(true, this.updateProjectionMatrix.bind(this));
+        this.config.copy(config, true);
+
+        return super.copy(target, silence);
     }
 }
 
@@ -112,7 +102,6 @@ interface IConfig extends CameraConfig {
     far?: number;
 }
 
-interface IEvent extends CameraEvent { }
+interface IEvent extends CameraEvent {}
 
 export { IConfig as IPerspectiveCameraConfig };
-

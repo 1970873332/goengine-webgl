@@ -1,4 +1,4 @@
-import { Matrix4 } from "@core/object/math/Index";
+import Matrix4 from "@goengine/core/src/object/math/matrix/Matrix4";
 import BaseGLNode, { BaseGLNodeConfig, BaseGLNodeEvent } from "../node/Base";
 
 /**
@@ -9,14 +9,9 @@ export default abstract class Camera<
     E extends IEvent,
 > extends BaseGLNode<C, E> {
     /**
-     * 是否是相机
-     */
-    public readonly isCamera: boolean = true;
-
-    /**
      * 投影矩阵
      */
-    public projectionMatrix: Matrix4 = new Matrix4();
+    public projectionMatrix = new Matrix4();
 
     /**
      * 更新投影矩阵
@@ -30,11 +25,20 @@ export default abstract class Camera<
     public resize(...args: any[]): this {
         throw new Error("未实现resize");
     }
+
+    public copy(target: this, silence?: boolean): this {
+        const { projectionMatrix } = target;
+
+        this.projectionMatrix.copy(projectionMatrix, true);
+
+        return super.copy(target, silence);
+    }
 }
 
-interface IEvent extends BaseGLNodeEvent { }
+interface IConfig extends BaseGLNodeConfig {}
 
-interface IConfig extends BaseGLNodeConfig { }
+interface IEvent extends BaseGLNodeEvent {}
 
-export { IConfig as CameraConfig, IEvent as CameraEvent };
+type IAny = Camera<any, any>;
 
+export { IAny as CameraAny, IConfig as CameraConfig, IEvent as CameraEvent };

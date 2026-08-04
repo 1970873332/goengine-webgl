@@ -1,5 +1,5 @@
-import { Vector3 } from "@core/object/math/Index";
-import BaseNode, { BaseNodeConfig, BaseNodeEvent } from "@core/object/Node";
+import Vector3 from "@goengine/core/src/object/math/vector/Vector3";
+import BaseNode, { BaseNodeConfig, BaseNodeEvent } from "@goengine/core/src/object/Node";
 
 /**
  * gl基础节点
@@ -7,37 +7,42 @@ import BaseNode, { BaseNodeConfig, BaseNodeEvent } from "@core/object/Node";
 export default abstract class BaseGLNode<
     C extends IConfig,
     E extends IEvent,
-> extends BaseNode<C, E, BaseGLNode<any, any>> {
-    /**
-     * 是否是gl节点
-     */
-    public readonly isGLNode: boolean = true;
-
+> extends BaseNode<C, E, IAny> {
     /**
      * 向上的向量
      */
-    public up = new Vector3(0, 1, 0);
+    public readonly up = new Vector3(0, 1, 0);
 
     public setConfig(config: C): void {
         super.setConfig(config);
 
-        config.up && this.up.copy(config.up);
+        const { up } = config;
+
+        up && this.up.set(up.x, up.y, up.z, true);
     }
 
-    public copy(target: this): this {
-        const {
-            up,
-        } = target;
+    public copy(target: this, silence?: boolean): this {
+        const { up } = target;
 
         this.up.copy(up, true);
 
-        return super.copy(target);
+        return super.copy(target, silence);
     }
 }
 
-interface IConfig extends BaseNodeConfig, Partial<Pick<BaseGLNode<any, any>, "up">> { }
+interface IConfig extends BaseNodeConfig {
+    /**
+     * 朝上的向量
+     */
+    up?: VectorObject.Vector3;
+}
 
-interface IEvent extends BaseNodeEvent { }
+interface IEvent extends BaseNodeEvent {}
 
-export { IConfig as BaseGLNodeConfig, IEvent as BaseGLNodeEvent };
+type IAny = BaseGLNode<any, any>;
 
+export {
+    IAny as BaseGLNodeAny,
+    IConfig as BaseGLNodeConfig,
+    IEvent as BaseGLNodeEvent,
+};

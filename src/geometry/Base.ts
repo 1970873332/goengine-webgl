@@ -1,6 +1,6 @@
-import DuplicatableComponent, { DuplicatableSaveJSON } from "@core/component/fussy/Duplicatable";
-import ArrayAttribute from "@core/object/attribute/Array";
-import { Vector4 } from "@core/object/math/Index";
+import DuplicatableComponent from "@goengine/core/src/component/fussy/Duplicatable";
+import ArrayAttribute from "@goengine/core/src/object/attribute/Array";
+import Vector4 from "@goengine/core/src/object/math/vector/Vector4";
 
 /**
  * 基础几何
@@ -9,11 +9,6 @@ export default abstract class BaseGeometry<
     C extends IConfig,
     E extends IEvent,
 > extends DuplicatableComponent<Func.CallBack<BaseGeometry<C, E>>, E> {
-    /**
-     * 是否是几何
-     */
-    public readonly isGeometry: boolean = true;
-
     /**
      * 是否唯一
      */
@@ -31,7 +26,7 @@ export default abstract class BaseGeometry<
      * 设置配置
      * @param config
      */
-    public setConfig(config: C): void { }
+    public setConfig(config: C): void {}
     /**
      * 重构位置属性
      * @param args
@@ -46,17 +41,11 @@ export default abstract class BaseGeometry<
     public restructureUV(offset: Vector4): void {
         throw new Error("未实现restructureUV");
     }
-
-    public toJSON(): ISaveJSON {
-        return {
-            ...super.toJSON()
-        };
-    }
 }
 
-interface IEvent { }
+interface IEvent {}
 
-interface IConfig { }
+interface IConfig {}
 
 interface IAttribute {
     /**
@@ -73,12 +62,11 @@ interface IAttribute {
     position?: ArrayAttribute<Float32Array<ArrayBuffer>>;
 }
 
-interface ISaveJSON extends DuplicatableSaveJSON { }
+type IAny = BaseGeometry<any, any>;
 
 export {
+    IAny as BaseGeometryAny,
     IAttribute as BaseGeometryAttribute,
     IConfig as BaseGeometryConfig,
     IEvent as BaseGeometryEvent,
-    ISaveJSON as BaseGeometrySaveJSON
 };
-

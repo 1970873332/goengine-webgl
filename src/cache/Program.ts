@@ -1,4 +1,4 @@
-import ShaderState from "../states/Shader";
+import { ShaderStateAny } from "../state/Shader";
 import MapCache from "./base/Map";
 
 /**
@@ -11,11 +11,14 @@ export default class ProgramCache extends MapCache<WebGLProgram> {
      * @returns
      */
     public allocate(
-        shader: GLSL.Shader<ShaderState<any>>,
+        shader: WebGL.Shader<ShaderStateAny>,
     ): WebGLProgram | undefined {
         if (this.has(shader.id)) return this.get(shader.id)!;
         const program: WebGLProgram = this.gl.createProgram(),
-            { vertex: { shader: { value: vertexShader } }, fragment: { shader: { value: fragmentShader } } } = shader;
+            {
+                vertex: { webglShader: vertexShader },
+                fragment: { webglShader: fragmentShader },
+            } = shader;
         vertexShader && this.gl.attachShader(program, vertexShader);
         fragmentShader && this.gl.attachShader(program, fragmentShader);
         this.gl.linkProgram(program);

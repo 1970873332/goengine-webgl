@@ -1,14 +1,16 @@
-import ArrayAttribute from "@core/object/attribute/Array";
-import { AttributeKey } from "@webgl/GLSL";
-import BaseGeometry, { BaseGeometryAttribute } from "../geometry/Base";
+import ArrayAttribute from "@goengine/core/src/object/attribute/Array";
+import { AttributeKey } from "@goengine/webgl/src/GLSL";
+import { BaseGeometryAny, BaseGeometryAttribute } from "../geometry/Base";
 import WeakMapCache from "./base/WeakMap";
 import { State } from "./State";
 
 /**
  * 缓冲缓存
  */
-export default class BufferCache extends WeakMapCache<ArrayBuffer, WebGLBuffer> {
-
+export default class BufferCache extends WeakMapCache<
+    ArrayBuffer,
+    WebGLBuffer
+> {
     /**
      * 缓冲
      * @param id
@@ -22,14 +24,14 @@ export default class BufferCache extends WeakMapCache<ArrayBuffer, WebGLBuffer> 
      * @param geometry
      */
     public bind(
-        geometry: Instance<typeof BaseGeometry>,
+        geometry: BaseGeometryAny,
         program: WebGLProgram,
         state: State,
     ): void {
         // 绑定属性缓冲
         Object.keys(geometry.attribute).forEach((key) => {
             const attribute: ArrayAttribute<Float32Array<ArrayBuffer>> =
-                geometry.attribute[key as keyof BaseGeometryAttribute]!,
+                    geometry.attribute[key as keyof BaseGeometryAttribute]!,
                 source: ArrayBuffer = attribute.array.buffer,
                 buffer: WebGLBuffer = this.buffer(source),
                 local: number =

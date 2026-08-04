@@ -1,5 +1,4 @@
-import base from "./base.frag";
-import def from "./default.frag";
+import BASE_FRAG from "./base.frag";
+import DEFAULT_FRAG from "./default.frag";
 
-export { base, def };
-
+export { BASE_FRAG, DEFAULT_FRAG };

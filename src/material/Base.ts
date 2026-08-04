@@ -1,5 +1,5 @@
-import DuplicatableComponent, { DuplicatableSaveJSON } from "@core/component/fussy/Duplicatable";
-import { BlendType, SideType } from "@webgl//GLSL";
+import DuplicatableComponent from "@goengine/core/src/component/fussy/Duplicatable";
+import { BlendType, SideType } from "@goengine/webgl/src/GLSL";
 
 /**
  * 基础材质
@@ -8,11 +8,6 @@ export default abstract class BaseMaterial<
     C extends IConfig,
     E extends IEvent,
 > extends DuplicatableComponent<Func.CallBack<BaseMaterial<C, E>>, E> {
-    /**
-     * 是否是材质
-     */
-    public readonly isMaterial: boolean = true;
-
     /**
      * 颜色
      */
@@ -48,45 +43,33 @@ export default abstract class BaseMaterial<
      */
     public setConfig(config: C): void {
         const {
-            color,
+            side = this.side,
+            alpha = this.alpha,
+            color = this.color,
+            blending = this.blending,
+            depthTest = this.depthTest,
+            depthWrite = this.depthWrite,
+            transparent = this.transparent,
+        } = config;
+
+        Object.assign(this, {
+            side,
             alpha,
-            transparent,
+            color,
+            blending,
             depthTest,
             depthWrite,
-            side,
-            blending,
-        } = config;
-        this.color = color ?? this.color;
-        this.alpha = alpha ?? this.alpha;
-        this.side = side ?? this.side;
-        this.blending = blending ?? this.blending;
-        this.depthTest = depthTest ?? this.depthTest;
-        this.depthWrite = depthWrite ?? this.depthWrite;
-        this.transparent = transparent ?? this.transparent;
-    }
-
-    public toJSON(): ISaveJSON {
-        return {
-            ...super.toJSON(),
-            color: this.color,
-            alpha: this.alpha,
-            transparent: this.transparent,
-            depthTest: this.depthTest,
-            depthWrite: this.depthWrite,
-            side: this.side,
-            blending: this.blending,
-        };
+            transparent,
+        });
     }
 }
 
-interface IEvent { }
+interface IEvent {}
 
-interface IConfig extends Partial<TOptions> { }
-
-interface ISaveJSON extends DuplicatableSaveJSON, TOptions { }
+interface IConfig extends Partial<TOptions> {}
 
 type TOptions = Pick<
-    BaseMaterial<any, any>,
+    IAny,
     | "color"
     | "alpha"
     | "transparent"
@@ -96,9 +79,10 @@ type TOptions = Pick<
     | "blending"
 >;
 
-export {
-    IEvent as BaseMaterialEvent,
-    ISaveJSON as BaseMaterialSaveJSON,
-    IConfig as MaterialConfig
-};
+type IAny = BaseMaterial<any, any>;
 
+export {
+    IAny as BaseMaterialAny,
+    IEvent as BaseMaterialEvent,
+    IConfig as MaterialConfig,
+};

@@ -1,65 +1,69 @@
-import { Matrix4 } from "@core/object/math/Index";
-import { BlendType, SideType, UniformKey, UniformType } from "@webgl/GLSL";
-import Texture from "@webgl/states/Texture";
+import Matrix4 from "@goengine/core/src/object/math/matrix/Matrix4";
+import { ArrayUtils } from "@goengine/core/src/util/Array";
+import { BlendType, SideType, UniformKey, UniformType } from "@goengine/webgl/src/GLSL";
+import Mesh, { MeshAny } from "@goengine/webgl/src/node/common/Mesh";
+import Scene from "@goengine/webgl/src/node/common/Scene";
+import { TextureAny } from "@goengine/webgl/src/state/Texture";
 import BufferCache from "../cache/Buffer";
 import ProgramCache from "../cache/Program";
 import ShaderCache from "../cache/Shader";
 import StateCache, { State } from "../cache/State";
 import TextureCache from "../cache/Texture";
-import Camera from "../camera/Camera";
-import BaseMaterial from "../material/Base";
-import ShaderMaterial, { ShaderMaterialUniform } from "../material/Shader";
-import { Mesh, Scene } from "../node/Index";
-import ShaderState from "../states/Shader";
+import { CameraAny } from "../camera/Camera";
+import { BaseMaterialAny } from "../material/Base";
+import ShaderMaterial, { ShaderMaterialUniform } from "../material/node/Shader";
 
 /**
  * Webgl渲染器
  */
 export default class WebglRenderer {
-    /**
-     * webgl上下文
-     */
-    protected declare gl: GLSL.WebGLAllRenderingContext;
-    /**
-     * 缓冲缓存
-     */
-    protected declare bufferCache: BufferCache;
-    /**
-     * 着色器缓存
-     */
-    protected declare shaderCache: ShaderCache;
-    /**
-     * 纹理缓存
-     */
-    protected declare textureCache: TextureCache;
-    /**
-     * 程序缓存
-     */
-    protected declare programCache: ProgramCache;
-    /**
-     * 状态缓存
-     */
-    protected declare stateCache: StateCache;
+    constructor(config: IConfig) {
+        const { gl = this.gl } = config;
+
+        Object.assign(this, {
+            gl,
+            stateCache: new StateCache(gl),
+            shaderCache: new ShaderCache(gl),
+            bufferCache: new BufferCache(gl),
+            textureCache: new TextureCache(gl),
+            programCache: new ProgramCache(gl),
+        });
+    }
+
     /**
      * 状态
      */
-    private state?: State;
+    protected state?: State;
+    /**
+     * webgl上下文
+     */
+    declare protected gl: Canvas.WebGLContext;
+    /**
+     * 缓冲缓存
+     */
+    declare protected bufferCache: BufferCache;
+    /**
+     * 着色器缓存
+     */
+    declare protected shaderCache: ShaderCache;
+    /**
+     * 纹理缓存
+     */
+    declare protected textureCache: TextureCache;
+    /**
+     * 程序缓存
+     */
+    declare protected programCache: ProgramCache;
+    /**
+     * 状态缓存
+     */
+    declare protected stateCache: StateCache;
     /**
      * 临时float32数组
      */
-    private interimFloat32Array: Float32Array = new Float32Array(Matrix4.identity.length);
-
-    constructor(config: IConfig) {
-        const {
-            gl
-        } = config;
-        this.gl = gl;
-        this.bufferCache = new BufferCache(gl);
-        this.shaderCache = new ShaderCache(gl);
-        this.textureCache = new TextureCache(gl);
-        this.programCache = new ProgramCache(gl);
-        this.stateCache = new StateCache(gl);
-    }
+    protected readonly interimFloat32Array = new Float32Array(
+        Matrix4.identity.length,
+    );
 
     /**
      * 应用MVP矩阵
@@ -78,18 +82,14 @@ export default class WebglRenderer {
             state.uniform.location[key] ??
             this.gl.getUniformLocation(program, key);
         this.interimFloat32Array.set(matrix.m);
-        this.gl.uniformMatrix4fv(
-            u_matrix,
-            false,
-            this.interimFloat32Array
-        );
+        this.gl.uniformMatrix4fv(u_matrix, false, this.interimFloat32Array);
     }
     /**
      * 应用渲染模式
      * @param state
      * @param material
      */
-    protected applyRenderMode(state: State, material: Instance<typeof BaseMaterial>): void {
+    protected applyRenderMode(state: State, material: BaseMaterialAny): void {
         const { transparent, depthTest, depthWrite, side, blending } = material;
 
         // 混合
@@ -170,15 +170,15 @@ export default class WebglRenderer {
     ): void {
         Object.entries(uniforms).forEach(([name, attribute]) => {
             const location: WebGLUniformLocation | null =
-                state.uniform.location[name] ??
-                this.gl.getUniformLocation(program, name),
+                    state.uniform.location[name] ??
+                    this.gl.getUniformLocation(program, name),
                 { value, type } = attribute;
             if (!location || !value) return;
             // 设置uniform变量值
             switch (type) {
                 case UniformType.Texture:
                     const texture: WebGLTexture = this.textureCache.allocate(
-                        value as Instance<typeof Texture>,
+                        value as TextureAny,
                         this.stateCache.nextUnit,
                     );
                     let unit: number = state.texture.list.indexOf(texture);
@@ -209,21 +209,16 @@ export default class WebglRenderer {
      * @param camera
      * @returns
      */
-    public renderNode(node: Instance<typeof Mesh>, camera: Instance<typeof Camera>): void {
-        const {
-            material,
-            geometry,
-        } = node;
+    public renderNode(node: MeshAny, camera: CameraAny): void {
+        const { material, geometry } = node;
         if (!material || !geometry) return;
         const // 分配着色器
-            shader: GLSL.Shader<ShaderState<any>> =
-                this.shaderCache.allocate(material),
+            shader = this.shaderCache.allocate(material),
             // 分配程序
-            program: WebGLProgram | undefined =
-                this.programCache.allocate(shader);
+            program = this.programCache.allocate(shader);
         if (!program) return console.warn("程序未准备就绪", node);
         // 分配状态
-        const state: State = this.stateCache.allocate(program);
+        const state = this.stateCache.allocate(program);
         // 应用渲染模式
         if (this.state !== state) {
             this.state = state;
@@ -269,8 +264,8 @@ export default class WebglRenderer {
             );
         } else {
             const {
-                attribute: { position },
-            } = geometry,
+                    attribute: { position },
+                } = geometry,
                 { size, length } = position ?? { size: 0, length: 0 };
             this.gl.drawArrays(this.gl.TRIANGLES, 0, length / size);
         }
@@ -282,22 +277,28 @@ export default class WebglRenderer {
             this.stateCache.set(program, state);
         }
     }
-
     /**
      * 渲染场景
-     * @param scene 
-     * @param camera 
+     * @param scene
+     * @param camera
      */
-    public renderScene(scene: Scene, camera: Instance<typeof Camera>): void {
-        scene.traverse((node) => { node instanceof Mesh && this.renderNode(node, camera) });
+    public renderScene(scene: Scene, camera: CameraAny): void {
+        ArrayUtils.traverse(
+            scene.children,
+            (node) => node instanceof Mesh && this.renderNode(node, camera),
+        );
     }
+    /**
+     * 销毁
+     */
+    public destroy(): void {}
 }
 
 interface IConfig {
     /**
      * webgl上下文
      */
-    gl: GLSL.WebGLAllRenderingContext;
+    gl: Canvas.WebGLContext;
     /**
      * 是否开启深度测试
      */

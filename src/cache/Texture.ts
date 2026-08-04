@@ -1,4 +1,4 @@
-import Texture from "@webgl/states/Texture";
+import { TextureAny } from "@goengine/webgl/src/state/Texture";
 import MapCache from "./base/Map";
 
 /**
@@ -8,17 +8,18 @@ export default class TextureCache extends MapCache<WebGLTexture> {
     /**
      * 默认纹理
      */
-    protected declare defaultTexture: WebGLTexture;
+    declare protected defaultTexture: WebGLTexture;
 
     /**
      * 分配
      * @param target
      * @returns
      */
-    public allocate(texture: Instance<typeof Texture>, unit: number): WebGLTexture {
-        const { uuid, target } = texture;
+    public allocate(texture: TextureAny, unit: number): WebGLTexture {
+        const { uuid, source } = texture;
         if (this.has(uuid)) return this.get(uuid)!;
-        if (!(target instanceof HTMLImageElement) || !target.complete) return this.defaultTexture;
+        if (!(source instanceof HTMLImageElement) || !source.complete)
+            return this.defaultTexture;
 
         const webgltexture: WebGLTexture = this.gl.createTexture();
 
@@ -34,7 +35,7 @@ export default class TextureCache extends MapCache<WebGLTexture> {
             this.gl.RGBA,
             this.gl.RGBA,
             this.gl.UNSIGNED_BYTE,
-            target,
+            source,
         );
         // 生成mipmap
         this.gl.generateMipmap(this.gl.TEXTURE_2D);

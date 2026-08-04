@@ -1,5 +1,4 @@
-import base from "./base.vert";
-import def from "./default.vert";
+import BASE_VERT from "./base.vert";
+import DEFAULT_VERT from "./default.vert";
 
-export { base, def };
-
+export { BASE_VERT, DEFAULT_VERT };
