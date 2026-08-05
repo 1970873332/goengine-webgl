@@ -1,5 +1,8 @@
 import Vector3 from "@goengine/core/src/object/math/vector/Vector3";
-import BaseNode, { BaseNodeConfig, BaseNodeEvent } from "@goengine/core/src/object/Node";
+import BaseNode, {
+    BaseNodeConfig,
+    BaseNodeEvent,
+} from "@goengine/core/src/object/Node";
 
 /**
  * gl基础节点

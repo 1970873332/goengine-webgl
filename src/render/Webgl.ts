@@ -1,6 +1,11 @@
 import Matrix4 from "@goengine/core/src/object/math/matrix/Matrix4";
 import { ArrayUtils } from "@goengine/core/src/util/Array";
-import { BlendType, SideType, UniformKey, UniformType } from "@goengine/webgl/src/GLSL";
+import {
+    BlendType,
+    SideType,
+    UniformKey,
+    UniformType,
+} from "@goengine/webgl/src/GLSL";
 import Mesh, { MeshAny } from "@goengine/webgl/src/node/common/Mesh";
 import Scene from "@goengine/webgl/src/node/common/Scene";
 import { TextureAny } from "@goengine/webgl/src/state/Texture";
