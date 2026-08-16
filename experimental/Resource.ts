@@ -1,5 +1,5 @@
 import Vector2 from "@goengine/core/src/object/math/vector/Vector2";
-import { DocumentUtils } from "@goengine/core/temporary/util/Document";
+import { DocumentUtils } from "@goengine/core/experimental/util/Document";
 import { Texture } from "three";
 
 const textureContexts = [

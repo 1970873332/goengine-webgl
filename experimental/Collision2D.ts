@@ -1,4 +1,4 @@
-import { Matter2D } from "@goengine/core/temporary/object/physics/Index";
+import { Matter2D } from "@goengine/core/experimental/object/physics/Index";
 import Value from "@goengine/core/src/object/attribute/Value";
 import Euler from "@goengine/core/src/object/math/transfrom/Euler";
 import Vector3 from "@goengine/core/src/object/math/vector/Vector3";
