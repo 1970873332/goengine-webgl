@@ -6,6 +6,16 @@ import BaseMaterial, { BaseMaterialEvent, MaterialConfig } from "../Base";
  */
 export default class MeshMaterial extends BaseMaterial<IConfig, IEvent> {
     /**
+     * 网格材质
+     * @param config 配置
+     */
+    constructor(config?: IConfig) {
+        super();
+
+        config && this.setConfig(config);
+    }
+
+    /**
      * 纹理贴图
      */
     public texture?: Texture;
@@ -13,6 +23,15 @@ export default class MeshMaterial extends BaseMaterial<IConfig, IEvent> {
      * 纹理透明度
      */
     public textureAlpha: number = 1;
+
+    public setConfig(config: IConfig): void {
+        super.setConfig(config);
+
+        const { texture = this.texture, textureAlpha = this.textureAlpha } =
+            config;
+
+        Object.assign(this, { texture, textureAlpha });
+    }
 }
 
 interface IConfig
@@ -22,4 +41,4 @@ interface IConfig
 
 interface IEvent extends BaseMaterialEvent {}
 
-export { IConfig as BaseMeshMaterialConfig };
+export { IConfig as MeshMaterialConfig };

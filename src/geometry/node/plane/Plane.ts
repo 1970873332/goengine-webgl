@@ -12,6 +12,16 @@ import { BaseGLNodeEvent } from "@goengine/webgl/src/node/Base";
  */
 export default class PlaneGeometry extends BaseGeometry<IConfig, IEvent> {
     /**
+     * 平面几何体
+     * @param config 配置
+     */
+    constructor(config?: IConfig) {
+        super();
+
+        config && this.setConfig(config);
+    }
+
+    /**
      * 默认位置
      */
     public static readonly position = new ArrayAttribute(

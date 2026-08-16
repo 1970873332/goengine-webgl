@@ -12,6 +12,16 @@ export default class ShaderMaterial<T extends IUniforms> extends BaseMaterial<
     IEvent
 > {
     /**
+     * 着色器材质
+     * @param config 配置
+     */
+    constructor(config?: IConfig<T>) {
+        super();
+
+        config && this.setConfig(config);
+    }
+
+    /**
      * uniforms
      */
     public readonly uniforms: Partial<T> = {};
