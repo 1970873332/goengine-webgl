@@ -5,8 +5,13 @@
     "license": "MIT",
     "author": "Mr.Rui",
     "type": "module",
-    "dependencies": {},
+    "dependencies": {
+        "@goengine/core": "workspace:*",
+        "matter-js": "^0.20.0",
+        "three": "^0.181.2"
+    },
     "devDependencies": {
-        "@webgpu/types": "^0.1.66"
+        "@types/matter-js": "^0.20.2",
+        "@types/three": "^0.181.0"
     }
 }
