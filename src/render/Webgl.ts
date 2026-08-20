@@ -290,7 +290,12 @@ export default class WebglRenderer {
     public renderScene(scene: Scene, camera: CameraAny): void {
         ArrayUtils.traverse(
             scene.children,
-            (node) => node instanceof Mesh && this.renderNode(node, camera),
+            (node) => {
+                // 注意：回调必须返回 void 而非 false，
+                // 否则 ArrayUtils.traverse 会把 false 视为"跳过子树"，
+                // 导致 Group 等节点内的网格永远无法渲染。
+                if (node instanceof Mesh) this.renderNode(node, camera);
+            },
         );
     }
     /**
