@@ -1,5 +1,5 @@
 import DuplicatableComponent from "@goengine/core/src/component/fussy/Duplicatable";
-import { BlendType, SideType } from "@goengine/webgl/src/GLSL";
+import { Blend, CullFace } from "@goengine/webgl/src/GLSL";
 
 /**
  * 基础材质
@@ -29,21 +29,20 @@ export default abstract class BaseMaterial<
      */
     public depthWrite: boolean = true;
     /**
-     * 渲染面
+     * 剔除
      */
-    public side: SideType = SideType.Front;
+    public cull: CullFace = CullFace.Front;
     /**
      * 混合模式
      */
-    public blending: BlendType = BlendType.Normal;
-
+    public blending: Blend = Blend.Normal;
     /**
      * 设置配置
      * @param config
      */
     public setConfig(config: C): void {
         const {
-            side = this.side,
+            cull = this.cull,
             alpha = this.alpha,
             color = this.color,
             blending = this.blending,
@@ -53,7 +52,7 @@ export default abstract class BaseMaterial<
         } = config;
 
         Object.assign(this, {
-            side,
+            cull,
             alpha,
             color,
             blending,
@@ -64,19 +63,19 @@ export default abstract class BaseMaterial<
     }
 }
 
-interface IEvent {}
+interface IEvent { }
 
-interface IConfig extends Partial<TOptions> {}
+interface IConfig extends Partial<TOptions> { }
 
 type TOptions = Pick<
     IAny,
     | "color"
     | "alpha"
+    | "cull"
+    | "blending"
     | "transparent"
     | "depthTest"
     | "depthWrite"
-    | "side"
-    | "blending"
 >;
 
 type IAny = BaseMaterial<any, any>;

@@ -30,6 +30,14 @@ export default abstract class GLMap extends CanvasComponent<IEvent> {
      */
     public scene = new Scene();
 
+    /**
+     * 更新循环：先清理画布，再交由子类渲染场景
+     */
+    protected update(time: DOMHighResTimeStamp): void {
+        super.update(time);
+        this.clear();
+    }
+
     public destroy(): void {
         this.scene.destroy();
         this.camera.destroy();

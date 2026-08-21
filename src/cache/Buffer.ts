@@ -31,7 +31,7 @@ export default class BufferCache extends WeakMapCache<
         // 绑定属性缓冲
         Object.keys(geometry.attribute).forEach((key) => {
             const attribute: ArrayAttribute<Float32Array<ArrayBuffer>> =
-                    geometry.attribute[key as keyof BaseGeometryAttribute]!,
+                geometry.attribute[key as keyof BaseGeometryAttribute]!,
                 source: ArrayBuffer = attribute.array.buffer,
                 buffer: WebGLBuffer = this.buffer(source),
                 local: number =
@@ -66,7 +66,6 @@ export default class BufferCache extends WeakMapCache<
                 }
                 // 更新缓存位置
                 if (!(key in state.buffer.location)) {
-                    state.expire = true;
                     state.buffer.location[key] = local;
                 }
             }

@@ -25,13 +25,13 @@ export enum UniformKey {
     projectionMatrix = "u_projectionMatrix",
 }
 
-export enum SideType {
-    Front = 0,
-    Back = 1,
-    Double = 2,
+export enum CullFace {
+    None = 0,
+    Front = 1,
+    Back = 2
 }
 
-export enum BlendType {
+export enum Blend {
     None = 0,
     Normal = 1,
 }

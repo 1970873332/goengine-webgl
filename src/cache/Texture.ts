@@ -8,7 +8,7 @@ export default class TextureCache extends MapCache<WebGLTexture> {
     /**
      * 默认纹理
      */
-    declare protected defaultTexture: WebGLTexture;
+    declare protected texture: WebGLTexture;
 
     /**
      * 分配
@@ -19,7 +19,7 @@ export default class TextureCache extends MapCache<WebGLTexture> {
         const { uuid, source } = texture;
         if (this.has(uuid)) return this.get(uuid)!;
         if (!(source instanceof HTMLImageElement) || !source.complete)
-            return this.defaultTexture;
+            return this.texture;
 
         const webgltexture: WebGLTexture = this.gl.createTexture();
 

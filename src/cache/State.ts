@@ -1,4 +1,4 @@
-import { AttributeKey, BlendType, SideType } from "@goengine/webgl/src/GLSL";
+import { AttributeKey } from "@goengine/webgl/src/GLSL";
 import { BaseGeometryAttribute } from "../geometry/Base";
 import WeakMapCache from "./base/WeakMap";
 
@@ -34,7 +34,6 @@ export default class StateCache extends WeakMapCache<WebGLProgram, IState> {
     public allocate(program: WebGLProgram): IState {
         if (this.has(program)) return this.get(program)!;
         const state: IState = {
-            expire: false,
             buffer: {
                 location: {
                     uv: this.gl.getAttribLocation(program, AttributeKey.uv),
@@ -53,17 +52,7 @@ export default class StateCache extends WeakMapCache<WebGLProgram, IState> {
             },
             texture: {
                 list: [],
-            },
-            use: {
-                cull: false,
-                blend: false,
-                depthTest: false,
-                depthWrite: true,
-            },
-            apply: {
-                cull: SideType.Back,
-                blending: BlendType.None,
-            },
+            }
         };
         this.set(program, state);
         return state;
@@ -78,10 +67,6 @@ export default class StateCache extends WeakMapCache<WebGLProgram, IState> {
 
 interface IState {
     /**
-     * 是否过期
-     */
-    expire: boolean;
-    /**
      * 缓冲区
      */
     buffer: IBuffer;
@@ -93,14 +78,6 @@ interface IState {
      * 纹理
      */
     texture: ITexture;
-    /**
-     * 使用
-     */
-    use: IUse;
-    /**
-     *  应用
-     */
-    apply: IApply;
 }
 
 interface IBuffer {
@@ -122,36 +99,6 @@ interface ITexture {
      * 列表
      */
     list: WebGLTexture[];
-}
-
-interface IUse {
-    /**
-     * 剔除面
-     */
-    cull: boolean;
-    /**
-     * 混合
-     */
-    blend: boolean;
-    /**
-     * 深度测试
-     */
-    depthTest: boolean;
-    /**
-     * 深度写入
-     */
-    depthWrite: boolean;
-}
-
-interface IApply {
-    /**
-     * 剔除面
-     */
-    cull: SideType;
-    /**
-     * 混合
-     */
-    blending: BlendType;
 }
 
 type TLocation = {
