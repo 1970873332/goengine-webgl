@@ -3,7 +3,7 @@ import CanvasComponent, {
 } from "@goengine/core/src/component/draw/Canvas";
 import Scene from "@goengine/webgl/src/node/common/Scene";
 import { CameraAny } from "../camera/Camera";
-import WebglRenderer from "../render/Webgl";
+import WebglRenderer from "../render/WebGL";
 
 /**
  * Webgl场景
@@ -47,4 +47,4 @@ export default abstract class GLMap extends CanvasComponent<IEvent> {
     }
 }
 
-interface IEvent extends CanvasComponentEvent {}
+interface IEvent extends CanvasComponentEvent { }

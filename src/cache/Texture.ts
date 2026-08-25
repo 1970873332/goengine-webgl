@@ -1,6 +1,10 @@
 import { TextureAny } from "@goengine/webgl/src/state/Texture";
 import MapCache from "./base/Map";
 
+const {
+    MAX_COMBINED_TEXTURE_IMAGE_UNITS
+} = WebGLRenderingContext;
+
 /**
  * 纹理缓存
  */
@@ -9,7 +13,41 @@ export default class TextureCache extends MapCache<WebGLTexture> {
      * 默认纹理
      */
     declare protected texture: WebGLTexture;
+    /**
+     * 最大纹理单元
+     */
+    declare public readonly maxUnit: number;
 
+    /**
+     * 纹理单元
+     */
+    public readonly unit: number = 0;
+    /**
+     * 列表
+     */
+    public readonly list: WebGLTexture[] = [];
+
+    /**
+     * 下一个纹理单元
+     */
+    public get nextUnit(): number {
+        if (!this.maxUnit) {
+            Object.assign(this, {
+                maxUnit: this.gl.getParameter(MAX_COMBINED_TEXTURE_IMAGE_UNITS)
+            });
+        }
+
+        return (this.unit + 1) % this.maxUnit;
+    }
+
+    /**
+     * 纹理单元步进
+     */
+    public stepUnit(): number {
+        Object.assign(this, { unit: this.nextUnit });
+
+        return this.unit;
+    }
     /**
      * 分配
      * @param target
@@ -17,7 +55,9 @@ export default class TextureCache extends MapCache<WebGLTexture> {
      */
     public allocate(texture: TextureAny, unit: number): WebGLTexture {
         const { uuid, source } = texture;
+
         if (this.has(uuid)) return this.get(uuid)!;
+
         if (!(source instanceof HTMLImageElement) || !source.complete)
             return this.texture;
 
@@ -61,11 +101,13 @@ export default class TextureCache extends MapCache<WebGLTexture> {
             this.gl.TEXTURE_MAG_FILTER,
             this.gl.LINEAR,
         );
+
         // 应用各向异性过滤
         const extension: EXT_texture_filter_anisotropic | null =
             this.gl.getExtension("EXT_texture_filter_anisotropic") ||
             this.gl.getExtension("WEBKIT_EXT_texture_filter_anisotropic") ||
             this.gl.getExtension("MOZ_EXT_texture_filter_anisotropic");
+
         extension &&
             this.gl.texParameterf(
                 this.gl.TEXTURE_2D,
@@ -77,7 +119,9 @@ export default class TextureCache extends MapCache<WebGLTexture> {
                     ),
                 ), // 4x各向异性过滤
             );
+
         this.set(uuid, webgltexture);
+
         return webgltexture;
     }
 }

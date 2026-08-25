@@ -1,7 +1,7 @@
 import IdentityComponent from "@goengine/core/src/component/Identity";
 import { UniformType } from "@goengine/webgl/src/GLSL";
-import { DEFAULT_FRAG } from "@goengine/webgl/src/glsl/fragment/Index";
-import { DEFAULT_VERT } from "@goengine/webgl/src/glsl/vertex/Index";
+import { BASE_FRAG, DEFAULT_FRAG } from "@goengine/webgl/src/glsl/fragment/Index";
+import { BASE_VERT, DEFAULT_VERT } from "@goengine/webgl/src/glsl/vertex/Index";
 import BaseMaterial, { BaseMaterialEvent, MaterialConfig } from "../Base";
 
 /**
@@ -28,11 +28,11 @@ export default class ShaderMaterial<T extends IUniforms> extends BaseMaterial<
     /**
      * 顶点着色器
      */
-    public readonly vertex = new IdentityComponent(DEFAULT_VERT);
+    public readonly vertex = new IdentityComponent(`${BASE_VERT}\n${DEFAULT_VERT}`.trim());
     /**
      * 片元着色器
      */
-    public readonly fragment = new IdentityComponent(DEFAULT_FRAG);
+    public readonly fragment = new IdentityComponent(`${BASE_FRAG}\n${DEFAULT_FRAG}`.trim());
 
     public setConfig(config: IConfig<T>): void {
         super.setConfig(config);
@@ -61,7 +61,7 @@ interface IConfig<T extends IUniforms> extends MaterialConfig {
     fragment?: string;
 }
 
-interface IEvent extends BaseMaterialEvent {}
+interface IEvent extends BaseMaterialEvent { }
 
 interface IAttribute {
     /**
@@ -74,6 +74,6 @@ interface IAttribute {
     value: unknown;
 }
 
-interface IUniforms extends Record<string, IAttribute> {}
+interface IUniforms extends Record<string, IAttribute> { }
 
 export { IUniforms as ShaderMaterialUniform };

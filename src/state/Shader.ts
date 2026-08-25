@@ -1,77 +1,88 @@
-import IdentityComponent from "@goengine/core/src/component/Identity";
+
+const {
+    COMPILE_STATUS
+} = WebGLRenderingContext;
 
 /**
  * 着色器状态
  */
-export default class ShaderState<
-    E extends IEvent,
-> extends IdentityComponent<E> {
+export default class ShaderState {
     constructor(
+        /**
+         * 着色器类型
+         */
         public readonly type: GLenum,
-        char: string,
-        unverifiedID?: string,
-    ) {
-        super(char, unverifiedID);
-    }
+        /**
+         * 着色器id
+         */
+        public readonly uuid: string,
+        /**
+         * 着色器源码
+         */
+        public readonly source: string,
+    ) { }
 
-    /**
-     * 是否有资源
-     */
-    public source: boolean = false;
-    /**
-     * 是否编译
-     */
-    public compile: boolean = false;
-    /**
-     * 是否完成
-     */
-    public complete: boolean = false;
     /**
      * 着色器
      */
-    private shader?: WebGLShader | null;
+    public readonly shader?: WebGLShader | null;
+    /**
+     * 是否编译
+     */
+    public readonly compiled: boolean = false;
 
     /**
-     * webgl着色器
+     * 初始化着色器
+     * @param gl 
+     * @returns 
      */
-    public get webglShader(): WebGLShader | null {
-        return this.shader ?? null;
-    }
+    public initShader(gl: Canvas.WebGLContext): WebGLShader | null {
+        if (this.shader instanceof WebGLShader) return this.shader;
 
+        const shader = gl.createShader(this.type);
+
+        Object.assign(this, { shader })
+
+        return shader;
+    }
     /**
      * 编译
+     * @param gl 
+     * @returns 
      */
-    public compiled(gl: Canvas.WebGLContext): this {
-        if (this.complete) return this;
-        // 创建着色器
-        if ((this.shader ??= gl.createShader(this.type))) {
-            const { shader } = this;
-            // 上传着色器源代码
-            if (!this.source) {
-                gl.shaderSource(shader, this.char);
-                this.source = !!gl.getShaderSource(shader);
-            }
+    public complete(gl: Canvas.WebGLContext): boolean {
+        if (this.compiled) return true;
+
+        try {
+            const shader: WebGLShader | null = this.initShader(gl);
+
+            if (!(shader instanceof WebGLShader)) throw new Error("着色器创建失败");
+
+            // 设置着色器源码
+            gl.shaderSource(shader, this.source);
             // 编译着色器
-            if (!this.compile) {
-                gl.compileShader(shader);
-                this.compile = !!gl.getShaderParameter(
-                    shader,
-                    gl.COMPILE_STATUS,
-                );
-            }
-            // 异常处理
-            if (!(this.complete = this.source && this.compile)) {
-                console.error(gl.getShaderInfoLog(shader));
+            gl.compileShader(shader);
+
+            // 检查着色器编译状态
+            if (!gl.getShaderParameter(shader, COMPILE_STATUS)) {
+                // 获取着色器日志
+                const info: string | null = gl.getShaderInfoLog(shader);
+                // 删除着色器
                 gl.deleteShader(shader);
-                delete this.shader;
+
+                throw new Error(`着色器编译失败:\n${info}`);
             }
+
+            Object.assign(this, {
+                shader,
+                compiled: true
+            });
+
+        } catch (e) {
+            console.error(e);
+            return false;
         }
-        return this;
+
+        return true;
     }
 }
-
-type IAny = ShaderState<any>;
-
-interface IEvent {}
-
-export { IAny as ShaderStateAny };

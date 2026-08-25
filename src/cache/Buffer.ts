@@ -2,7 +2,6 @@ import ArrayAttribute from "@goengine/core/src/object/attribute/Array";
 import { AttributeKey } from "@goengine/webgl/src/GLSL";
 import { BaseGeometryAny, BaseGeometryAttribute } from "../geometry/Base";
 import WeakMapCache from "./base/WeakMap";
-import { State } from "./State";
 
 /**
  * 缓冲缓存
@@ -24,9 +23,8 @@ export default class BufferCache extends WeakMapCache<
      * @param geometry
      */
     public bind(
-        geometry: BaseGeometryAny,
         program: WebGLProgram,
-        state: State,
+        geometry: BaseGeometryAny,
     ): void {
         // 绑定属性缓冲
         Object.keys(geometry.attribute).forEach((key) => {
@@ -34,12 +32,10 @@ export default class BufferCache extends WeakMapCache<
                 geometry.attribute[key as keyof BaseGeometryAttribute]!,
                 source: ArrayBuffer = attribute.array.buffer,
                 buffer: WebGLBuffer = this.buffer(source),
-                local: number =
-                    state.buffer.location[key] ??
-                    this.gl.getAttribLocation(
-                        program,
-                        AttributeKey[key as keyof typeof AttributeKey] ?? key,
-                    );
+                local: number = this.gl.getAttribLocation(
+                    program,
+                    AttributeKey[key as keyof typeof AttributeKey] ?? key,
+                );
             if (local !== -1) {
                 // 绑定缓冲
                 this.gl.bindBuffer(this.gl.ARRAY_BUFFER, buffer);
@@ -63,10 +59,6 @@ export default class BufferCache extends WeakMapCache<
                     // 启用属性
                     this.gl.enableVertexAttribArray(local);
                     this.set(source, buffer);
-                }
-                // 更新缓存位置
-                if (!(key in state.buffer.location)) {
-                    state.buffer.location[key] = local;
                 }
             }
         });

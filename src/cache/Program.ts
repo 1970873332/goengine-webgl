@@ -1,38 +1,24 @@
-import { ShaderStateAny } from "../state/Shader";
+import ProgramState from "../state/Program";
 import MapCache from "./base/Map";
 
 /**
- * 程序缓存
+ * 程序状态缓存
  */
-export default class ProgramCache extends MapCache<WebGLProgram> {
+export default class ProgramStateCache extends MapCache<ProgramState> {
+
     /**
-     * 分配
-     * @param shader
-     * @returns
+     * 存储
+     * @param uuid 
+     * @returns 
      */
-    public allocate(
-        shader: WebGL.Shader<ShaderStateAny>,
-    ): WebGLProgram | undefined {
-        if (this.has(shader.id)) return this.get(shader.id)!;
-        const program: WebGLProgram = this.gl.createProgram(),
-            {
-                vertex: { webglShader: vertexShader },
-                fragment: { webglShader: fragmentShader },
-            } = shader;
-        vertexShader && this.gl.attachShader(program, vertexShader);
-        fragmentShader && this.gl.attachShader(program, fragmentShader);
-        this.gl.linkProgram(program);
-        // 检查链接状态
-        const linkSuccess: boolean = !!this.gl.getProgramParameter(
-            program,
-            this.gl.LINK_STATUS,
-        );
-        if (!linkSuccess) {
-            console.error(this.gl.getProgramInfoLog(program));
-            this.gl.deleteProgram(program);
-            return void 0;
-        }
-        this.set(shader.id, program);
-        return program;
+    public save(uuid: string): ProgramState {
+        if (this.has(uuid)) return this.get(uuid)!;
+
+        const programState = new ProgramState();
+
+        this.set(uuid, programState);
+
+        return programState;
     }
 }
+

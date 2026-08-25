@@ -1,5 +1,5 @@
 import DuplicatableComponent from "@goengine/core/src/component/fussy/Duplicatable";
-import { Blend, CullFace } from "@goengine/webgl/src/GLSL";
+import { Blend, CullFace, DepthFunc } from "@goengine/webgl/src/GLSL";
 
 /**
  * 基础材质
@@ -37,6 +37,15 @@ export default abstract class BaseMaterial<
      */
     public blending: Blend = Blend.Normal;
     /**
+     * 深度比较函数
+     */
+    public depthFunc: DepthFunc = DepthFunc.Less;
+    /**
+     * 颜色通道写入
+     */
+    public colorWrite: boolean = true;
+
+    /**
      * 设置配置
      * @param config
      */
@@ -47,6 +56,8 @@ export default abstract class BaseMaterial<
             color = this.color,
             blending = this.blending,
             depthTest = this.depthTest,
+            depthFunc = this.depthFunc,
+            colorWrite = this.colorWrite,
             depthWrite = this.depthWrite,
             transparent = this.transparent,
         } = config;
@@ -57,6 +68,8 @@ export default abstract class BaseMaterial<
             color,
             blending,
             depthTest,
+            depthFunc,
+            colorWrite,
             depthWrite,
             transparent,
         });
@@ -76,6 +89,8 @@ type TOptions = Pick<
     | "transparent"
     | "depthTest"
     | "depthWrite"
+    | "depthFunc"
+    | "colorWrite"
 >;
 
 type IAny = BaseMaterial<any, any>;
@@ -83,5 +98,6 @@ type IAny = BaseMaterial<any, any>;
 export {
     IAny as BaseMaterialAny,
     IEvent as BaseMaterialEvent,
-    IConfig as MaterialConfig,
+    IConfig as MaterialConfig
 };
+
