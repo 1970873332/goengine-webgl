@@ -34,8 +34,8 @@ export default class ShaderStateCache extends MapCache<ShaderState> {
 
 
             return [
-                this.save(VERTEX_SHADER, vertex_uuid, vertex_char),
-                this.save(FRAGMENT_SHADER, fragment_uuid, fragment_char)
+                this.save(VERTEX_SHADER, /* vertex_uuid */"1", vertex_char),
+                this.save(FRAGMENT_SHADER, /* fragment_uuid */"2", fragment_char)
             ];
         }
 
@@ -52,7 +52,7 @@ export default class ShaderStateCache extends MapCache<ShaderState> {
     public save(type: GLenum, id: string, source: string): ShaderState {
         if (this.has(id)) return this.get(id)!;
 
-        const shaderState = new ShaderState(type, id, source);
+        const shaderState: ShaderState = new ShaderState(type, id, source);
 
         this.set(id, shaderState);
 

@@ -1,8 +1,9 @@
-import { ArrayUtils } from "@goengine/core/src/util/Array";
 import Matrix4 from "@goengine/core/src/object/math/matrix/Matrix4";
 import Vector3 from "@goengine/core/src/object/math/vector/Vector3";
+import { ArrayUtils } from "@goengine/core/src/util/Array";
 import Mesh, { MeshAny } from "@goengine/webgl/src/node/common/Mesh";
 import BufferCache from "../cache/Buffer";
+import LocationCache from "../cache/Location";
 import ProgramCache from "../cache/Program";
 import CacheShader from "../cache/Shader";
 import TextureCache from "../cache/Texture";
@@ -15,6 +16,7 @@ import Scene from "../node/common/Scene";
 import ProgramState from "../state/Program";
 import RenderState from "../state/Render";
 import Texture from "../state/Texture";
+import Vector4 from "@goengine/core/src/object/math/vector/Vector4";
 
 const {
     TRIANGLES,
@@ -34,10 +36,12 @@ export default class WebglRenderer {
             shaderCache: new CacheShader(gl),
             programCache: new ProgramCache(gl),
             bufferCache: new BufferCache(gl),
-            textureCache: new TextureCache(gl)
+            textureCache: new TextureCache(gl),
+            locationCache: new LocationCache(gl)
         });
     }
 
+    private log: boolean = false;
     /**
      * webgl上下文
      */
@@ -66,6 +70,10 @@ export default class WebglRenderer {
      * 纹理缓存
      */
     declare public readonly textureCache: TextureCache;
+    /**
+     * 位置缓存
+     */
+    declare public readonly locationCache: LocationCache;
 
     /**
     * 临时三维向量
@@ -164,32 +172,6 @@ export default class WebglRenderer {
             gl.cullFace(cull === CullFace.Front ? gl.FRONT : gl.BACK);
         }
     }
-
-    /**
-     * 应用MVP矩阵
-     * @param key 
-     * @param matrix 
-     * @param program 
-     * @returns 
-     */
-    protected applyMVPMatrix(
-        program: WebGLProgram,
-        key: string,
-        matrix: Matrix4,
-    ): void {
-        /* 这里需要调整未采用location缓存获取 */
-        const matrix_location: WebGLUniformLocation | null = this.gl.getUniformLocation(program, key);
-
-        if (!matrix_location) {
-            console.warn(`uniform变量${key}未找到`);
-            return;
-        }
-
-        // 临时赋值
-        this.interimFloat32Array.set(matrix.m);
-        // 上传四维矩阵数据
-        this.gl.uniformMatrix4fv(matrix_location, false, this.interimFloat32Array);
-    }
     /**
      * 设置uniform变量值
      * @param uniforms
@@ -201,7 +183,7 @@ export default class WebglRenderer {
         uniforms: ShaderMaterialUniform,
     ): void {
         Object.entries(uniforms).forEach(([name, attribute]) => {
-            const uniform_location: WebGLUniformLocation | null = this.gl.getUniformLocation(program, name);
+            const uniform_location: WebGLUniformLocation | null = this.locationCache.obtainUnifromLocation(program, name);
 
             if (!uniform_location) return console.warn(`uniform变量${name}未找到`);
 
@@ -230,6 +212,20 @@ export default class WebglRenderer {
                         this.gl.uniform1i(location, unit);
                     }
                     break;
+                case UniformType.Mat4:
+                    if (attribute.value instanceof Matrix4) {
+                        // 临时赋值
+                        this.interimFloat32Array.set(attribute.value.m);
+                        // 上传四维矩阵数据
+                        this.gl.uniformMatrix4fv(uniform_location, false, this.interimFloat32Array);
+                    }
+                    break;
+                case UniformType.Vec4:
+                    if (attribute.value instanceof Vector4) {
+                        // 上传四维向量
+                        this.gl.uniform4f(uniform_location, ...attribute.value.toArray());
+                    }
+                    break;
             }
         });
     }
@@ -250,25 +246,33 @@ export default class WebglRenderer {
                 vertexShaderState,
                 fragmentShaderState
             ] = this.shaderCache.allocate(material),
-            programState = this.programCache.save(ProgramState.obtainUUID(vertexShaderState.uuid, fragmentShaderState.uuid));
+            programState = this.programCache.obtain(ProgramState.obtainUUID(vertexShaderState.uuid, fragmentShaderState.uuid));
 
-        // 编译顶点着色器
-        !vertexShaderState.compiled && vertexShaderState.complete(this.gl);
-        // 编译片元着色器
-        !fragmentShaderState.compiled && fragmentShaderState.complete(this.gl);
-        // 链接程序
-        !programState.ready && programState.link(this.gl, vertexShaderState, fragmentShaderState);
-
-        const { program } = programState;
-        // 切换程序
-        if (program) {
-            if (program !== this.currentProgram) {
-                this.currentProgram = program;
-
-                this.gl.useProgram(program);
-            }
+        try {
+            // 编译顶点着色器
+            if (
+                !vertexShaderState.compiled && vertexShaderState.complete(this.gl)
+            ) throw void 0;
+            // 编译片元着色器
+            if (
+                !fragmentShaderState.compiled && fragmentShaderState.complete(this.gl)
+            ) throw void 0;
+            // 链接程序
+            if (
+                !programState.ready && programState.link(this.gl, vertexShaderState, fragmentShaderState)
+            ) throw void 0;
+        } catch {
+            return;
         }
-        else return console.log("程序未就绪");
+
+        const program = programState.program!;
+
+        // 切换程序(↑提前验证程序避免重复验证)
+        if (program !== this.currentProgram) {
+            this.currentProgram = program!;
+
+            this.gl.useProgram(program!);
+        }
 
         // 应用渲染模式
         this.applyRenderMode(material);
@@ -276,29 +280,32 @@ export default class WebglRenderer {
         // 绑定缓冲
         this.bufferCache.bind(program, geometry);
 
-        // 应用MVP矩阵（这里需要调整为通用uniform更新）
-        this.applyMVPMatrix(
-            program,
-            UniformKey.modelMatrix,
-            node.worldMatrix,
-        );
-        this.applyMVPMatrix(
-            program,
-            UniformKey.viewMatrix,
-            camera.worldMatrix,
-        );
-        this.applyMVPMatrix(
-            program,
-            UniformKey.projectionMatrix,
-            camera.projectionMatrix,
-        );
         // 更新uniform变量
         if (material instanceof ShaderMaterial) {
             this.setupUniform(program, material.uniforms);
         }
+        this.setupUniform(program, {
+            [UniformKey.modelMatrix]: {
+                type: UniformType.Mat4,
+                value: node.worldMatrix
+            },
+            [UniformKey.viewMatrix]: {
+                type: UniformType.Mat4,
+                value: camera.worldMatrix
+            },
+            [UniformKey.projectionMatrix]: {
+                type: UniformType.Mat4,
+                value: camera.projectionMatrix
+            }
+        });
 
         // 绘制
         this.draw(geometry);
+
+        if (!this.log) {
+            this.log = true;
+            console.log(this);
+        }
     }
     /**
      * 渲染

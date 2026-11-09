@@ -72,6 +72,10 @@ interface IAttribute {
      * 值
      */
     value: unknown;
+    /**
+     * 忽略
+     */
+    ignore?: boolean;
 }
 
 interface IUniforms extends Record<string, IAttribute> { }

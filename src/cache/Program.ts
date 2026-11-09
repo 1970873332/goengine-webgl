@@ -11,10 +11,10 @@ export default class ProgramStateCache extends MapCache<ProgramState> {
      * @param uuid 
      * @returns 
      */
-    public save(uuid: string): ProgramState {
+    public obtain(uuid: string): ProgramState {
         if (this.has(uuid)) return this.get(uuid)!;
 
-        const programState = new ProgramState();
+        const programState: ProgramState = new ProgramState();
 
         this.set(uuid, programState);
 
